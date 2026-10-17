@@ -1,0 +1,1296 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Hidden Ladders Gen 2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;700&family=Silkscreen&family=VT323&display=swap">
+<style>
+/* Layout: a 16-bit RPG menu in a night grove. Sticky pixel menu bar of section icons; a banner window with treeline and druid; then one framed window per section, each with its tool in sunk panels and a "good to know" list. Single deliberate night palette. */
+:root{
+  color-scheme:dark;
+  --night:#0b1610; --win-top:#23452f; --win-bot:#122719; --sunk:#0a120d; --edge:#2f4a35;
+  --ink:#f1ecd2; --dim:#9fb39f; --faint:#6b7f6f;
+  --gold:#f2c94c; --leaf:#9bd35a; --ember:#f0a03a; --sky:#6ea8d8; --blood:#e0573f;
+  --verd:#7fd650; --gilt:#f2c94c; --rube:#e0573f; --masser:#e39b7b; --secunda:#d9e2ef; --bg-sunk:#0a120d; --line-2:#3a5a40;
+  --m0:#80858b; --m1:#a7b5c1; --m2:#e2e6ea; --m3:#cdd79b; --m4:#d9a24f; --m5:#8fd3ff; --m6:#9a97c9; --m7:#7a6f9a; --m8:#6f9f4f; --m9:#d2463c;
+  --r0:#d8d2bd; --r1:#6ea8ff; --r2:#f2d04a; --r3:#f0903a; --r4:#8ff0e0; --r5:#d27bff; --r6:#ffe9a0;
+  --f-pix:"Pixelify Sans","Trebuchet MS",system-ui,sans-serif;
+  --f-label:"Silkscreen","Courier New",monospace;
+  --f-num:"VT323","Courier New",monospace;
+  --frame:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' shape-rendering='crispEdges'%3E%3Cg fill='%230a120d'%3E%3Crect x='1' y='0' width='10' height='1'/%3E%3Crect x='1' y='11' width='10' height='1'/%3E%3Crect x='0' y='1' width='1' height='10'/%3E%3Crect x='11' y='1' width='1' height='10'/%3E%3C/g%3E%3Cg fill='%23cfe0a0'%3E%3Crect x='1' y='1' width='10' height='1'/%3E%3Crect x='1' y='10' width='10' height='1'/%3E%3Crect x='1' y='1' width='1' height='10'/%3E%3Crect x='10' y='1' width='1' height='10'/%3E%3C/g%3E%3Cg fill='%23345a3a'%3E%3Crect x='2' y='2' width='8' height='1'/%3E%3Crect x='2' y='9' width='8' height='1'/%3E%3Crect x='2' y='2' width='1' height='8'/%3E%3Crect x='9' y='2' width='1' height='8'/%3E%3C/g%3E%3C/svg%3E");
+  --frame-gold:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' shape-rendering='crispEdges'%3E%3Cg fill='%230a120d'%3E%3Crect x='1' y='0' width='10' height='1'/%3E%3Crect x='1' y='11' width='10' height='1'/%3E%3Crect x='0' y='1' width='1' height='10'/%3E%3Crect x='11' y='1' width='1' height='10'/%3E%3C/g%3E%3Cg fill='%23f2c94c'%3E%3Crect x='1' y='1' width='10' height='1'/%3E%3Crect x='1' y='10' width='10' height='1'/%3E%3Crect x='1' y='1' width='1' height='10'/%3E%3Crect x='10' y='1' width='1' height='10'/%3E%3C/g%3E%3Cg fill='%238a5a12'%3E%3Crect x='2' y='2' width='8' height='1'/%3E%3Crect x='2' y='9' width='8' height='1'/%3E%3Crect x='2' y='2' width='1' height='8'/%3E%3Crect x='9' y='2' width='1' height='8'/%3E%3C/g%3E%3C/svg%3E");
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 76px)}
+body{margin:0;color:var(--ink);font:17px/1.45 var(--f-pix);background-color:var(--night);
+  background-image:repeating-conic-gradient(#0e1c14 0 25%, var(--night) 0 50%);background-size:4px 4px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--sunk)}
+canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px dashed var(--gold);outline-offset:3px}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.label{font:400 .72rem/1.25 var(--f-label);letter-spacing:.05em;text-transform:uppercase;color:var(--gold)}
+.win{border-style:solid;border-width:6px;border-image:var(--frame) 3 / 6px stretch;background:linear-gradient(var(--win-top),var(--win-bot));background-clip:padding-box;min-width:0}
+.sunk{background:var(--sunk);box-shadow:inset 0 0 0 2px var(--edge);padding:14px;min-width:0}
+
+/* menu bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--sunk);box-shadow:0 2px 0 var(--edge),0 4px 0 #000}
+.bar-in{max-width:1080px;margin:0 auto;padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;align-items:center;gap:10px}
+.stavenav{display:flex;gap:4px;overflow-x:auto;flex:1;min-width:0;scrollbar-width:none}
+.stavenav a{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 6px;text-decoration:none;color:var(--faint);font:400 .58rem var(--f-label);text-transform:uppercase;white-space:nowrap}
+.stavenav a canvas{width:27px;height:27px;opacity:.45}
+.stavenav a.lit{color:var(--leaf)}
+.stavenav a.lit canvas{opacity:1}
+.stavenav a:hover canvas{opacity:1}
+.luckmini{display:flex;align-items:center;gap:6px;flex:none}
+.luckmini span{font:400 .7rem var(--f-label);color:var(--gold)}
+.luckmini b{font:400 1.4rem var(--f-num);color:var(--ink)}
+.pbtn{background:var(--win-top);border:0;box-shadow:inset 0 0 0 2px var(--edge),inset -3px -3px 0 rgba(0,0,0,.35);padding:4px 10px;line-height:1}
+.pbtn:active{box-shadow:inset 0 0 0 2px var(--edge),inset 3px 3px 0 rgba(0,0,0,.35)}
+
+/* page */
+.page{max-width:1080px;margin:0 auto;padding-block:20px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:26px}
+.banner{padding:0;overflow:hidden}
+.banner canvas.sky{width:100%;height:auto;aspect-ratio:200/44}
+.hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:18px;padding:14px 18px 18px}
+@media (max-width:820px){.hero{grid-template-columns:1fr}}
+.titlerow{display:flex;gap:14px;align-items:flex-end}
+.titlerow canvas{width:64px;height:80px;margin-top:-50px;flex:none;filter:drop-shadow(0 3px 0 #0a120d)}
+.hero h1{font:700 clamp(2rem,6vw,3rem)/1 var(--f-pix);margin:0;text-shadow:3px 3px 0 #0a120d;text-wrap:balance}
+.gen{display:inline-block;font:700 .85rem/1.2 var(--f-pix);color:var(--sunk);background:var(--gold);padding:2px 8px;vertical-align:middle;margin-left:6px;box-shadow:2px 2px 0 #0a120d}
+.kicker{margin:10px 0 0;color:var(--dim)}
+.thesis{display:grid;gap:10px;margin-top:12px;max-width:62ch}
+.thesis p{margin:0}
+.charpanel{display:grid;gap:12px;align-content:start}
+.sig-row{display:grid;gap:4px}
+.sig-top{display:flex;justify-content:space-between;align-items:baseline}
+.sig-top label{font:400 .78rem var(--f-label);color:var(--gold);text-transform:uppercase}
+.sig-top output{font:400 1.7rem/1 var(--f-num)}
+.sig-read{margin:0;font-size:.9rem;color:var(--dim)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:14px;background:var(--sunk);box-shadow:inset 0 0 0 2px var(--edge)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:22px;background:var(--gold);box-shadow:inset -3px -3px 0 #8a5a12,0 0 0 2px #0a120d;border:0}
+input[type=range]::-moz-range-thumb{width:14px;height:22px;background:var(--gold);box-shadow:inset -3px -3px 0 #8a5a12,0 0 0 2px #0a120d;border:0;border-radius:0}
+.explored{display:grid;gap:6px}
+.seeds{display:flex;flex-wrap:wrap;gap:6px}
+.seed{display:block;padding:3px;background:var(--sunk);box-shadow:inset 0 0 0 2px var(--edge)}
+.seed canvas{width:27px;height:27px;opacity:.3}
+.seed.lit{box-shadow:inset 0 0 0 2px var(--leaf)}
+.seed.lit canvas{opacity:1}
+.grove-read,.omen p{margin:0;font-size:.92rem;color:var(--dim)}
+.omen p{color:var(--ink)}
+
+/* sections */
+.ladder{padding:18px;display:grid;gap:16px}
+.shead{display:flex;gap:14px;align-items:center}
+.shead canvas{width:45px;height:45px;flex:none}
+.shead h2{font:700 1.6rem/1.05 var(--f-pix);margin:0;color:var(--leaf);text-shadow:2px 2px 0 #0a120d}
+.shead .label{display:block;margin-bottom:2px}
+.lede{margin:0;max-width:70ch;font-size:1.04rem}
+.instrument{display:grid;gap:12px}
+.prompt{margin:0;font:700 1.05rem var(--f-pix);color:var(--gold)}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media (max-width:760px){.split{grid-template-columns:1fr}}
+.reading{display:grid;gap:10px;align-content:start;min-width:0}
+.reading h3{margin:0;font:700 1.2rem var(--f-pix);display:flex;gap:8px;align-items:center}
+.verdict{margin:0;color:var(--leaf)}
+.vstat{margin:0;font-size:.93rem;color:var(--dim)}
+.vstat b{color:var(--ink)}
+.whispers{margin:0;padding:12px 14px 12px 34px;background:var(--sunk);box-shadow:inset 0 0 0 2px var(--edge);display:grid;gap:6px;font-size:.95rem;list-style:none;position:relative}
+.whispers::before{content:"Good to know";position:absolute;top:-10px;left:12px;font:400 .66rem var(--f-label);color:var(--sunk);background:var(--leaf);padding:1px 6px;text-transform:uppercase}
+.whispers li{position:relative}
+.whispers li::before{content:"";position:absolute;left:-18px;top:.5em;width:6px;height:6px;background:var(--leaf)}
+.whispers b{color:var(--gold);font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{background:var(--sunk);border:0;box-shadow:inset 0 0 0 2px var(--edge);padding:5px 10px;font-size:.92rem}
+.chip[aria-pressed="true"]{background:var(--gold);color:var(--sunk);box-shadow:inset 0 0 0 2px #8a5a12}
+.chip:disabled{opacity:.4;cursor:not-allowed}
+.meter{display:block;height:10px;background:var(--sunk);box-shadow:inset 0 0 0 2px var(--edge);padding:2px;min-width:40px}
+.meter i{display:block;height:100%;background:var(--c,var(--leaf))}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:0}
+.kv dt{color:var(--dim)}
+.kv dd{margin:0;font-family:var(--f-num);font-size:1.2rem;line-height:1.15}
+.scroll{overflow-x:auto}
+details summary{cursor:pointer;color:var(--gold)}
+
+/* shops */
+.rungs{display:grid;gap:8px}
+.rung{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;text-align:left;background:var(--sunk);border:0;box-shadow:inset 0 0 0 2px var(--edge);padding:8px 10px}
+.rung[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--gold);background:#1a2a12}
+.rung .glyph{font:400 1.6rem/1 var(--f-num);width:32px;height:32px;display:grid;place-items:center;background:var(--win-top);box-shadow:inset 0 0 0 2px var(--edge);color:var(--gold)}
+.rung .quote{display:block;font-style:normal}
+.rung .nick{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:.85rem;color:var(--dim)}
+.spectrum{display:flex;height:14px;background:var(--sunk);box-shadow:inset 0 0 0 2px var(--edge);padding:2px;gap:1px}
+.spectrum span{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:.85rem;color:var(--dim);margin-top:6px}
+.legend span{display:inline-flex;gap:5px;align-items:center}
+.dot{display:inline-block;width:8px;height:8px}
+.worth{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.worth input{width:110px;background:var(--sunk);border:0;box-shadow:inset 0 0 0 2px var(--edge);padding:4px 8px;font:400 1.3rem var(--f-num)}
+.price{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.price > div{background:var(--sunk);box-shadow:inset 0 0 0 2px var(--edge);padding:8px 10px}
+.price .v{font:400 1.8rem/1 var(--f-num);color:var(--gold)}
+
+/* dungeons */
+.dlist{display:grid;gap:4px}
+.dhead,.drow{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr) auto;gap:10px;align-items:center}
+.dhead{padding:0 10px}
+.drow{text-align:left;background:var(--sunk);border:0;box-shadow:inset 0 0 0 2px var(--edge);padding:7px 10px}
+.drow[aria-expanded="true"]{box-shadow:inset 0 0 0 2px var(--gold)}
+.drow.dim{opacity:.4}
+.dn{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;min-width:0}
+.fam{font:400 .62rem var(--f-label);text-transform:uppercase;padding:1px 5px;box-shadow:inset 0 0 0 1px var(--faint);color:var(--dim)}
+.fam.on{color:var(--sunk);background:var(--leaf);box-shadow:none}
+.mcell{display:grid;gap:2px;min-width:0}
+.mcell small{font-size:.75rem;color:var(--dim)}
+.pips{display:grid;grid-template-columns:repeat(4,7px);gap:2px}
+.pips i{width:7px;height:7px;background:#1c2f22}
+.pips i.on{background:var(--m9)}
+.ddetail{background:#0f1d14;box-shadow:inset 0 0 0 2px var(--gold);padding:12px;display:grid;gap:8px;margin-bottom:6px}
+@media (max-width:560px){.dhead,.drow{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr)} .pips,.dhead span:last-child{display:none}}
+table.carry{border-collapse:collapse;width:100%;min-width:320px}
+.carry th,.carry td{padding:5px 8px;text-align:left;border-bottom:2px solid var(--edge)}
+.carry th{font:400 .7rem var(--f-label);color:var(--gold);text-transform:uppercase}
+.carry .r{text-align:right}
+.carry td.num{font-size:1.2rem}
+
+/* metals */
+.metals{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:6px}
+.metal{display:flex;gap:8px;align-items:center;background:var(--sunk);border:0;box-shadow:inset 0 0 0 2px var(--edge);padding:6px 8px;text-align:left;font-size:.92rem}
+.metal i{width:12px;height:12px;flex:none;box-shadow:0 0 0 2px #000}
+.metal[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--gold);color:var(--gold)}
+.bite{display:grid;gap:8px;align-content:start}
+.biterow{display:grid;grid-template-columns:92px minmax(0,1fr) 46px;gap:4px 10px;align-items:center}
+.biterow .pc{font:400 1.25rem var(--f-num);text-align:right}
+.biterow .who{grid-column:1 / -1;font-size:.8rem;color:var(--dim)}
+
+/* loot */
+.rarities{display:flex;flex-wrap:wrap;gap:6px}
+.rar{padding:3px 10px;color:var(--c);box-shadow:inset 0 0 0 2px var(--c);background:var(--sunk);font-weight:700}
+.rar.out{opacity:.5}
+.odds{display:grid;gap:8px}
+.oddrow{display:grid;grid-template-columns:130px minmax(0,1fr) 60px;gap:10px;align-items:center}
+.oddrow .pc{font:400 1.3rem var(--f-num);text-align:right}
+.drought{display:grid;gap:4px}
+.bones{display:flex;flex-wrap:wrap;gap:8px}
+.cast{background:var(--gold);color:var(--sunk);border:0;padding:8px 14px;font-weight:700;box-shadow:inset -3px -3px 0 #8a5a12,3px 3px 0 #0a120d}
+.cast.ghost{background:var(--win-top);color:var(--ink);box-shadow:inset 0 0 0 2px var(--edge),3px 3px 0 #0a120d}
+.cast:active{transform:translate(2px,2px);box-shadow:inset -3px -3px 0 #8a5a12}
+.lastroll{margin:0;min-height:1.4em;color:var(--gold)}
+.cup{display:flex;flex-wrap:wrap;gap:3px;min-height:14px}
+.cup i{width:12px;height:12px;background:var(--c);box-shadow:inset -2px -2px 0 rgba(0,0,0,.35)}
+@media (prefers-reduced-motion:no-preference){.cup i.new{animation:pop .25s steps(3)}}
+@keyframes pop{from{transform:scale(.3)}to{transform:scale(1)}}
+.fams{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px}
+.fams > div{background:var(--sunk);box-shadow:inset 0 0 0 2px var(--edge);padding:8px 10px;display:grid;gap:2px;font-size:.85rem;color:var(--dim)}
+.fams > div b{color:var(--ink);font-size:.95rem}
+.fams > div.on{box-shadow:inset 0 0 0 2px var(--r3)}
+.fams > div.on b{color:var(--r3)}
+
+/* guild ranks */
+.rankpick{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.rankpick .big{font:400 3rem/1 var(--f-num);color:var(--gold);min-width:1.2ch;text-align:center}
+.step{font-size:1.4rem;width:40px;height:40px}
+.rankdots{display:flex;flex-wrap:wrap;gap:4px}
+.rankdots button{width:32px;height:32px;background:var(--sunk);border:0;box-shadow:inset 0 0 0 2px var(--edge);font:400 1.2rem var(--f-num)}
+.rankdots button[aria-pressed="true"]{background:var(--gold);color:var(--sunk)}
+.keys{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:640px){.keys{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.keys > div{background:var(--sunk);box-shadow:inset 0 0 0 2px var(--edge);padding:10px;display:grid;gap:2px}
+.keys .v{font:400 2.2rem/1 var(--f-num)}
+.keys small{font-size:.8rem;color:var(--dim)}
+.opens{display:grid;gap:6px}
+.open{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:10px;background:var(--sunk);box-shadow:inset 0 0 0 2px var(--edge);padding:7px 10px}
+@media (max-width:520px){.open{grid-template-columns:1fr}}
+.open b{color:var(--gold)}
+.earlier{margin-top:4px}
+.earlier .opens{margin-top:8px}
+
+/* enchanting */
+.vessel{display:grid;gap:10px}
+.vrow{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+select{background:var(--sunk);border:0;box-shadow:inset 0 0 0 2px var(--edge);padding:6px 8px}
+select:disabled{opacity:.45}
+.fill{position:relative;height:22px;background:var(--sunk);box-shadow:inset 0 0 0 2px var(--edge)}
+.fill .room{position:absolute;left:2px;top:2px;bottom:2px;background:repeating-linear-gradient(90deg,#1f3a26 0 6px,#183020 6px 12px)}
+.fill .spend{position:absolute;left:2px;top:6px;bottom:6px;background:var(--leaf);max-width:calc(100% - 4px)}
+.fill.over .spend{background:var(--blood)}
+.bgroup{display:grid;gap:6px}
+.bchip .cost{font-family:var(--f-num);font-size:1.05rem;color:var(--dim);margin-left:4px}
+.bchip[aria-pressed="true"] .cost{color:var(--sunk)}
+.bchip.give[aria-pressed="true"]{background:var(--sky);box-shadow:inset 0 0 0 2px #2c4a6a}
+
+/* level & renown */
+.slots{display:grid;grid-template-columns:96px repeat(20,minmax(14px,1fr));gap:2px;min-width:520px;align-items:center}
+.slots .rl{font-size:.78rem;color:var(--dim)}
+.slots i{height:14px;background:#1c2f22}
+.slots i.on{background:var(--leaf)}
+.slots i.on2{background:var(--sky)}
+.slots i.on3{background:var(--faint)}
+.slots .ax{font:400 .95rem var(--f-num);color:var(--faint);text-align:center}
+.stages{display:flex;flex-wrap:wrap;gap:6px}
+.stage{background:var(--sunk);box-shadow:inset 0 0 0 2px var(--edge);padding:6px 10px;display:grid}
+.stage small{color:var(--dim);font-family:var(--f-num);font-size:1rem}
+.stage.on{box-shadow:inset 0 0 0 2px var(--gold)}
+.stage.on b{color:var(--gold)}
+.party{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.tier{background:var(--sunk);box-shadow:inset 0 0 0 2px var(--edge);padding:12px;display:grid;gap:6px;align-content:start}
+.tier h4{margin:0;font:700 1.2rem var(--f-pix);color:var(--leaf)}
+.tier p{margin:0;font-size:.92rem;color:var(--dim)}
+.tier p b{color:var(--ink)}
+.tier.abyss{box-shadow:inset 0 0 0 2px var(--blood)}
+.tier.abyss h4{color:var(--blood)}
+
+/* calendar */
+.clock{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center}
+.today{margin:0;font:700 1.2rem var(--f-pix)}
+.today small{display:block;font:400 .95rem var(--f-pix);color:var(--dim)}
+.moons{display:flex;gap:18px}
+.moon{display:flex;gap:8px;align-items:center;font-size:.88rem;color:var(--dim)}
+.hols{display:grid;gap:6px}
+.hol{display:grid;grid-template-columns:minmax(150px,1.1fr) minmax(0,1.4fr) minmax(0,1fr) auto;gap:6px 12px;align-items:center;background:var(--sunk);box-shadow:inset 0 0 0 2px var(--edge);padding:8px 10px}
+@media (max-width:760px){.hol{grid-template-columns:1fr auto}.hol .hw,.hol .ht{grid-column:1 / -1}}
+.hol.now{box-shadow:inset 0 0 0 2px var(--leaf)}
+.hol.marked{box-shadow:inset 0 0 0 2px var(--gold)}
+.hn{display:grid}
+.hn small{color:var(--dim);font-size:.8rem}
+.hw{font-size:.92rem}
+.ht{font-size:.85rem;color:var(--dim)}
+.cd{font:400 1.15rem var(--f-num);color:var(--gold);white-space:nowrap}
+.mk{background:var(--sunk);border:0;box-shadow:inset 0 0 0 2px var(--edge);padding:3px 8px;font-size:.82rem}
+.mk[aria-pressed="true"]{background:var(--gold);color:var(--sunk)}
+
+/* quiz */
+.streak{display:flex;flex-wrap:wrap;gap:16px;align-items:baseline}
+.streak b{font:400 1.6rem var(--f-num);color:var(--gold)}
+.q{margin:0;font:700 1.15rem var(--f-pix)}
+.answers{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.ans{text-align:left;background:var(--sunk);border:0;box-shadow:inset 0 0 0 2px var(--edge);padding:10px 12px}
+.ans:hover:not(:disabled){box-shadow:inset 0 0 0 2px var(--gold)}
+.ans.right{background:#1f3a1a;box-shadow:inset 0 0 0 2px var(--verd)}
+.ans.wrong{background:#3a1a14;box-shadow:inset 0 0 0 2px var(--blood)}
+.ans:disabled{cursor:default}
+.feedback{display:grid;gap:4px;min-height:1.5em}
+.fx{margin:0;font-weight:700}
+.fx.ok{color:var(--verd)}
+.fx.no{color:var(--blood)}
+.why{margin:0;color:var(--dim)}
+
+.colophon{color:var(--dim);font-size:.9rem;display:grid;gap:6px}
+.colophon p{margin:0}
+.colophon .sig{color:var(--ink)}
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translate(-50%,40px);opacity:0;z-index:20;background:var(--sunk);box-shadow:inset 0 0 0 2px var(--gold),4px 4px 0 #000;padding:8px 14px;color:var(--gold);max-width:calc(100% - 32px);pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:no-preference){.toast{transition:opacity .2s steps(3),transform .2s steps(3)}}
+.beneath{}
+</style>
+
+<header class="bar">
+  <div class="bar-in">
+    <nav class="stavenav" id="stavenav" aria-label="Sections"></nav>
+    <div class="luckmini" role="group" aria-label="Luck">
+      <button type="button" class="pbtn" data-act="luck" data-d="-1" aria-label="Lower Luck">&minus;</button>
+      <span>Luck</span><b class="num" id="luckmini">50</b>
+      <button type="button" class="pbtn" data-act="luck" data-d="1" aria-label="Raise Luck">+</button>
+    </div>
+  </div>
+</header>
+
+<main class="page" id="top">
+
+  <section class="win banner" aria-labelledby="h-title">
+    <canvas class="sky" id="grove" width="200" height="44" aria-hidden="true"></canvas>
+    <div class="hero">
+      <div>
+        <div class="titlerow">
+          <canvas id="druid" width="16" height="20" role="img" aria-label="Pixel druid with a leafed staff"></canvas>
+          <h1 id="h-title">Hidden Ladders <span class="gen">Gen 2</span></h1>
+        </div>
+        <p class="kicker">A field guide to the numbers Daggerfall Online doesn't show you &middot; for [ROSE]</p>
+        <div class="thesis">
+          <p>The game never says a shop is quality 19 or a dungeon ranks 21. It gives you hints instead: a shop that greets you with incense and soft music, a dungeon called a Coven on the travel map.</p>
+          <p>This guide turns those hints into numbers you can use. Set your Luck, level and Renown on the right, and every section below updates to match your character.</p>
+        </div>
+      </div>
+      <div class="win charpanel" style="padding:14px" aria-labelledby="h-sigil">
+        <div class="label" id="h-sigil">Your character</div>
+        <div class="sig-row">
+          <div class="sig-top"><label for="sig-luck">Luck</label><output id="o-luck" for="sig-luck">50</output></div>
+          <input type="range" id="sig-luck" min="1" max="100" step="1" value="50">
+          <p class="sig-read" id="r-luck"></p>
+        </div>
+        <div class="sig-row">
+          <div class="sig-top"><label for="sig-level">Character level</label><output id="o-level" for="sig-level">12</output></div>
+          <input type="range" id="sig-level" min="1" max="30" step="1" value="12">
+          <p class="sig-read" id="r-level"></p>
+        </div>
+        <div class="sig-row">
+          <div class="sig-top"><label for="sig-renown">Renown</label><output id="o-renown" for="sig-renown">15</output></div>
+          <input type="range" id="sig-renown" min="1" max="50" step="1" value="15">
+          <p class="sig-read" id="r-renown"></p>
+        </div>
+        <div class="explored">
+          <span class="label">Sections explored</span>
+          <div class="seeds" id="seeds"></div>
+          <p class="grove-read" id="grove-read"></p>
+        </div>
+        <div class="omen">
+          <span class="label">Tip of the day</span>
+          <p id="omen"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="win ladder" id="counter" aria-labelledby="h-counter">
+    <div class="shead"><canvas data-icon="coin" width="9" height="9"></canvas><div><span class="label">Section 1</span><h2 id="h-counter">Shops</h2></div></div>
+    <p class="lede">Every shop tells you its quality in the first line it says when you walk in. There are five tiers. Buy plain goods in the bad shops and sell your loot in the best ones.</p>
+    <div class="split">
+      <div class="reading sunk">
+        <p class="prompt">What did the shop say when you walked in?</p>
+        <div class="rungs" id="rungs"></div>
+      </div>
+      <div class="reading sunk" id="shopread" aria-live="polite"></div>
+    </div>
+    <ul class="whispers">
+      <li><b>Shops count your Luck in whole tens.</b> At 69 you shop like 60, so one more point can be a full step up.</li>
+      <li>Only <b>pawn shops</b> sell magic items, and only from the middle of the Average tier up.</li>
+      <li><b>Gem stores</b> need the Good tier for emeralds, and a bit higher for diamonds and sapphires.</li>
+      <li><b>Alchemists</b> keep rare ingredients in better shops: Mummy Wrappings, Gryphon Feather and Nymph Hair need the Good tier, Holy Relic needs Best, and Dragon's Scales only the very top of Best. Every alchemist stocks Unicorn Horn, Basilisk Eye and Pearl.</li>
+      <li>Repairing an item doesn't raise what a shop pays for it online. Shops pay for the condition it was in when you found it.</li>
+      <li>Better shops watch their shelves. A shop's quality adds directly to your chance of getting caught stealing.</li>
+    </ul>
+  </section>
+
+  <section class="win ladder" id="descent" aria-labelledby="h-descent">
+    <div class="shead"><canvas data-icon="door" width="9" height="9"></canvas><div><span class="label">Section 2</span><h2 id="h-descent">Dungeons</h2></div></div>
+    <p class="lede">The travel map shows each dungeon's type, and the type decides who lives there, what metal drops and how much magic loot you'll find. Metal and magic are ranked separately, so the best place for one isn't always the best for the other.</p>
+    <div class="instrument sunk">
+      <p class="prompt">What are you after?</p>
+      <div class="chips" id="seek"></div>
+      <div class="chips" id="famchips" aria-label="Legendary family"></div>
+      <div class="dlist" id="dlist"></div>
+    </div>
+    <div class="instrument sunk">
+      <p class="prompt">Chance a foe carries a top-metal piece, at your Luck</p>
+      <div class="scroll"><table class="carry" id="carry"></table></div>
+      <p class="vstat" id="goldline"></p>
+    </div>
+    <ul class="whispers">
+      <li><b>Metal and magic are separate rankings.</b> A Giant Stronghold drops weak metal but better magic than a Prison.</li>
+      <li>Human Strongholds, Prisons and Ruined Castles scale their metal with <b>your character level</b>, up to a Vampire Haunt's.</li>
+      <li>Mines, caves and nests sit at the bottom for metal, however hard they fight.</li>
+      <li><b>Best farming:</b> Desecrated Temples have the most daedra. Covens have the best metal plus four kinds of daedra. Bring mithril or better.</li>
+    </ul>
+  </section>
+
+  <section class="win ladder" id="forge" aria-labelledby="h-forge">
+    <div class="shead"><canvas data-icon="anvil" width="9" height="9"></canvas><div><span class="label">Section 3</span><h2 id="h-forge">Weapon Metals</h2></div></div>
+    <p class="lede">Ten metals, from iron to daedric. Some foes need a minimum metal. Online, a weaker weapon still hits them, but it does 20% less damage for each tier you're short, down to a minimum of 10%.</p>
+    <div class="instrument sunk">
+      <p class="prompt">What is your weapon made of?</p>
+      <div class="metals" id="metals"></div>
+      <div class="split">
+        <div class="reading" id="metalread"></div>
+        <div class="bite" id="bite" aria-live="polite"></div>
+      </div>
+    </div>
+    <ul class="whispers">
+      <li><b>Silver works like steel</b> against most foes, but does full damage to every ghost, wraith, vampire and werecreature. Carry one early.</li>
+      <li><b>Fists and spells ignore metal requirements</b> completely.</li>
+      <li>Silver and adamantium hold more enchantment than mithril.</li>
+      <li>Leather armour is 3 and chain is 6. Shields ignore metal: buckler 1, round 2, kite 3, tower 4.</li>
+    </ul>
+  </section>
+
+  <section class="win ladder" id="harvest" aria-labelledby="h-harvest">
+    <div class="shead"><canvas data-icon="gem" width="9" height="9"></canvas><div><span class="label">Section 4</span><h2 id="h-harvest">Loot Rarity</h2></div></div>
+    <p class="lede">Seven rarity tiers, and only the first four drop from enemies. What you kill and where you kill it set the odds. Luck nudges them up or down.</p>
+    <div class="rarities" id="rarities"></div>
+    <p class="vstat">The last three never drop at random: Aetheric pieces are a boss's own set, Artifacts are Daggerfall's quest rewards, and Gilded is a single item, the Hourlock.</p>
+    <div class="instrument sunk">
+      <p class="prompt">What did you just kill?</p>
+      <div class="chips" id="sources"></div>
+      <div class="split">
+        <div class="reading">
+          <div class="odds" id="odds" aria-live="polite"></div>
+          <div class="drought" id="drought"></div>
+        </div>
+        <div class="reading">
+          <div class="bones">
+            <button type="button" class="cast" data-act="cast" data-n="1">Roll once</button>
+            <button type="button" class="cast ghost" data-act="cast" data-n="25">Roll 25</button>
+            <button type="button" class="chip" data-act="resetbones">Clear</button>
+          </div>
+          <p class="lastroll" id="lastroll" aria-live="polite"></p>
+          <div class="cup" id="cup" aria-label="Recent rolls"></div>
+          <p class="vstat" id="tally"></p>
+        </div>
+      </div>
+      <div class="fams" id="fams"></div>
+    </div>
+    <ul class="whispers">
+      <li><b>Bad-luck protection is real.</b> Every 25 pieces you pick up below Legendary raise your Legendary odds by a fifth, up to triple. Getting one resets it.</li>
+      <li>Rare pieces drop unidentified, and <b>their bonuses already work</b> before you identify them.</li>
+      <li>Salvaging breaks a piece into Welkynd Shards: Magic 1, Rare 3, Legendary 8, Exalted 15. Each hone on a piece doubles the next hone's price.</li>
+      <li>Resistance lines on gear stop at 45% per element. Race and spells stack on top of that.</li>
+    </ul>
+  </section>
+
+  <section class="win ladder" id="doors" aria-labelledby="h-doors">
+    <div class="shead"><canvas data-icon="key" width="9" height="9"></canvas><div><span class="label">Section 5</span><h2 id="h-doors">Guild Ranks</h2></div></div>
+    <p class="lede">Every guild has ten ranks, and every promotion checks the same four things.</p>
+    <div class="instrument sunk">
+      <p class="prompt">Which rank are you looking at?</p>
+      <div class="rankpick">
+        <button type="button" class="pbtn step" data-act="rank" data-d="-1" aria-label="Lower rank">&minus;</button>
+        <span class="big" id="rankbig" aria-live="polite">5</span>
+        <button type="button" class="pbtn step" data-act="rank" data-d="1" aria-label="Raise rank">+</button>
+        <div class="rankdots" id="rankdots" role="group" aria-label="Rank"></div>
+      </div>
+      <div class="keys" id="keys"></div>
+      <div id="titles" class="vstat"></div>
+      <div class="opens" id="opens"></div>
+    </div>
+    <ul class="whispers">
+      <li>The fastest way to <b>Daedra summoning</b> is the Mages Guild or the Temple of Julianos, both at rank 6.</li>
+      <li>A knightly order's Seneschal gives you armour in <b>the metal matching your rank</b>, and you keep one piece. Rank 5 is mithril, the cheapest way to get it.</li>
+      <li>Stendarr gives a rank-in-50 chance to <b>survive a killing blow</b>. At rank 9 that's almost one death in five ignored.</li>
+      <li>The Thieves Guild never kicks you out. The Fighters Guild pays 10% more for quests and charges 10% less for repairs with every rank.</li>
+      <li>Online, rank 8 and 9 are council chairs, won on merit at each Sunday's Turning. Reputation arrives at most 15 a real day.</li>
+    </ul>
+  </section>
+
+  <section class="win ladder" id="binding" aria-labelledby="h-binding">
+    <div class="shead"><canvas data-icon="rune" width="9" height="9"></canvas><div><span class="label">Section 6</span><h2 id="h-binding">Enchanting</h2></div></div>
+    <p class="lede">Every item has a fixed amount of enchantment room. Powers use up room. Side effects and trapped souls add room back.</p>
+    <div class="instrument sunk">
+      <p class="prompt">Pick an item, then add enchantments.</p>
+      <div class="vessel">
+        <div class="vrow">
+          <label class="label" for="ench-item">Item</label>
+          <select id="ench-item"></select>
+          <label class="label" for="ench-metal">Metal</label>
+          <select id="ench-metal"></select>
+        </div>
+        <div class="fill" id="fill"><div class="room"></div><div class="spend"></div></div>
+        <p class="vstat" id="vstat" aria-live="polite"></p>
+      </div>
+      <div class="bgroup"><span class="label">Powers &middot; use room</span><div class="chips" id="b-powers"></div></div>
+      <div class="bgroup"><span class="label">Side effects &middot; add room</span><div class="chips" id="b-draw"></div></div>
+      <div class="bgroup"><span class="label">Trapped souls &middot; add room</span><div class="chips" id="b-souls"></div></div>
+    </div>
+    <ul class="whispers">
+      <li><b>One Daedra Lord's soul adds 8,000 room,</b> more than three amulets' worth.</li>
+      <li>Up to 10 lines total, side effects and souls included. Costs 10 gold for every point of powers. Side effects and souls don't lower the gold.</li>
+      <li>The newer armour types, like brigandine, can hold less than these numbers. Check the total the enchanter shows you.</li>
+      <li><b>Cast When Held</b> spells wear the item a little as long as it's worn. Pieces with Repairs Objects now mend everything you wear by 2% a tick.</li>
+      <li>Spell strength follows character level. Spell cost follows your skill in its school: (110 &minus; skill) &divide; 400 of its gold price, never under 5. Range costs &times;1.5, an area &times;2, an area at range &times;2.5.</li>
+    </ul>
+  </section>
+
+  <section class="win ladder" id="kindling" aria-labelledby="h-kindling">
+    <div class="shead"><canvas data-icon="flame" width="9" height="9"></canvas><div><span class="label">Section 7</span><h2 id="h-kindling">Level &amp; Renown</h2></div></div>
+    <p class="lede">You have two levels. Character level comes from your skills and decides what spawns, how hard your spells hit and how much gold corpses carry. Renown is the online level, kept on the server: each point adds 3 health and 2 magicka.</p>
+    <div class="instrument sunk">
+      <p class="prompt">What the game spawns at your level</p>
+      <p class="vstat" id="slotline"></p>
+      <div class="scroll"><div class="slots" id="slots"></div></div>
+    </div>
+    <div class="instrument sunk">
+      <p class="prompt">Your Renown</p>
+      <div class="stages" id="stages"></div>
+      <dl class="kv" id="renownkv"></dl>
+      <div class="party"><span class="label">Party in the room</span><div class="chips" id="party"></div></div>
+      <p class="verdict" id="renownverdict"></p>
+    </div>
+    <div class="tiers" id="tiers">
+      <div class="tier"><h4>Regular</h4><p>Foes as Daggerfall made them. One dungeon in five has a single elite. Respawns in 20 real minutes.</p></div>
+      <div class="tier"><h4>Elite</h4><p>&times;2 health, &times;2 damage. Three or four elites at &times;7 health and &times;4 damage. Respawns in 40 minutes.</p></div>
+      <div class="tier abyss"><h4>Abyss</h4><p>Foes level 24 or more at &times;4 health and &times;2.5 damage, elites &times;9 and &times;4.5. Appears 2 to 4 squares from the main city of the busiest region, lasts 48 real hours unless beaten, and collapses 3 minutes after it falls. The next one appears 2 hours later.</p><p><b>Rewards for every fighter:</b> 400 gold per level, a piece that's Legendary one time in four (otherwise Rare), two more Rare or better, a Brass of Numidium piece one time in three, and the Hourlock one time in fifty.</p></div>
+    </div>
+    <ul class="whispers">
+      <li><b>Loot is rolled using the host's Renown.</b> In a group, the player with the highest Renown should host the dungeon.</li>
+      <li>Class foes (mages, knights, thieves) match your character level, so they give less Renown than a monster in the same fight.</li>
+      <li>An account earns at most 15,000 Renown an hour. Raids pay three quests' worth; Sethrakul pays six.</li>
+      <li>Open-world elites are one foe in twenty from level 3: two Magic pieces, a 6% Legendary chance and 20 to 60 gold per level.</li>
+      <li>Champions (Mighty, Stalwart, Swift, Vampiric, Thorned) have double health. A Stalwart has triple. They drop better loot.</li>
+    </ul>
+  </section>
+
+  <section class="win ladder" id="wheel" aria-labelledby="h-wheel">
+    <div class="shead"><canvas data-icon="moon" width="9" height="9"></canvas><div><span class="label">Section 8</span><h2 id="h-wheel">Calendar &amp; Holidays</h2></div></div>
+    <p class="lede">Online, a game day lasts 2 real hours and a game year turns every 30 real days. Money holidays happen for everyone at once. Times below are in your own time zone.</p>
+    <div class="instrument sunk">
+      <div class="clock">
+        <p class="today" id="today"></p>
+        <div class="moons" id="moons"></div>
+      </div>
+      <div class="hols" id="hols"></div>
+    </div>
+    <ul class="whispers">
+      <li>A festival's half price doesn't stack with the online half price on potions, and shops still pay you at most half of full price. <b>You can't flip festival buys for profit.</b></li>
+      <li>Online, the summoner calls whichever Daedric prince you name, on any day, for 200,000 gold minus 1,000 for every point of their regard. The Glenmoril witches always call Hircine.</li>
+      <li>Months in order: Morning Star, Sun's Dawn, First Seed, Rain's Hand, Second Seed, Midyear, Sun's Height, Last Seed, Hearthfire, Frostfall, Sun's Dusk, Evening Star.</li>
+    </ul>
+  </section>
+
+  <section class="win ladder" id="test" aria-labelledby="h-test">
+    <div class="shead"><canvas data-icon="question" width="9" height="9"></canvas><div><span class="label">Section 9</span><h2 id="h-test">Quiz</h2></div></div>
+    <p class="lede">Read the clue, pick the answer. Get five in a row to mark this section explored.</p>
+    <div class="instrument sunk">
+      <div class="streak"><span>Streak <b id="streak">0</b></span><span>Best <b id="best">0</b></span><span id="title" class="verdict"></span></div>
+      <p class="q" id="tq"></p>
+      <div class="answers" id="tans"></div>
+      <div class="feedback" id="tfb" aria-live="polite"></div>
+      <div><button type="button" class="cast" data-act="next" id="tnext">Next question</button></div>
+    </div>
+  </section>
+
+  <footer class="colophon">
+    <p class="sig">Kept by Dryw, druid of the Ilessan Hills, for whoever walks the Bay with us.</p>
+    <p>Read from the game's own code. Where odds move with Luck, level or Renown, they move here too. Shop shelves and metal drops were rolled 60,000 times per band using the game's own functions. Shop prices are for a 1,000-gold item, from a sharp haggler (Mercantile 60, Personality 70) to a dull one (20 and 50). The game updates often, so a number here can drift; when the game and this page disagree, trust the game.</p>
+    <p>Your settings and progress stay in your own browser.</p>
+  </footer>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* pixel art: shared by the banner, the menu bar and the section headers */
+window.paintPix = function(cv, map, pal){
+  const h = map.length, w = Math.max(...map.map(r => r.length));
+  cv.width = w; cv.height = h;
+  const c = cv.getContext('2d'); c.imageSmoothingEnabled = false; c.clearRect(0, 0, w, h);
+  map.forEach((row, y) => [...row].forEach((ch, x) => { if (pal[ch]) { c.fillStyle = pal[ch]; c.fillRect(x, y, 1, 1); } }));
+};
+window.PIX = {
+  coin:{map:["..kkkkk..",".kyyyyyk.","kyYYyyyyk","kyYyyyyyk","kyyyYYyyk","kyyyyyYyk","kyyyyyyyk",".kyyyyyk.","..kkkkk.."],pal:{k:"#0a120d",y:"#f2c94c",Y:"#fff3b0"}},
+  door:{map:[".kkkkkkk.","kbbbbbbbk","kbBbbbBbk","kbBbbbBbk","kbBbbyBbk","kbBbbbBbk","kbBbbbBbk","kbbbbbbbk","kkkkkkkkk"],pal:{k:"#0a120d",b:"#8b5a2b",B:"#5a3a1c",y:"#f2c94c"}},
+  anvil:{map:["kkkkkkkkk","kSSSSSSSk","kkssssskk","..kssk...","..kssk...",".kssssk..","kssssssk.","kkkkkkkk.","........."],pal:{k:"#0a120d",s:"#8a96a3",S:"#d0d8e0"}},
+  gem:{map:["...kkk...","..kcCck..",".kcCccck.","kcCccccck","kccccccck",".kccccck.","..kccck..","...kck...","....k...."],pal:{k:"#0a120d",c:"#4fc3b0",C:"#e6fffb"}},
+  key:{map:[".kkk.....","kyyyk....","kyKyk....","kyyykkkkk",".kkyyyyyk","....kykyk","....k.k.k","........."],pal:{k:"#0a120d",y:"#f2c94c",K:"#0a120d"}},
+  rune:{map:[".kkkkkkk.","kgggggggk","kggPggggk","kgPgPgggk","kggPggPgk","kggggPggk","kgggggggk","kGGGGGGGk",".kkkkkkk."],pal:{k:"#0a120d",g:"#7d8a80",G:"#56625a",P:"#c08cff"}},
+  flame:{map:["....r....","...rr....","...ryr...","..ryyr.r.","..ryYyrr.",".rryYYyr.",".ryYYYyr.","..ryyyr..","...rrr..."],pal:{r:"#e05a2b",y:"#f2a33a",Y:"#ffe08a"}},
+  moon:{map:["...mmm...","..mmM....",".mmM.....",".mM......",".mM......",".mmM.....","..mmM....","...mmmm..","........."],pal:{m:"#f6efc8",M:"#c9c08f"}},
+  question:{map:["..kkkkk..",".kyyyyyk.","kyyk.kyyk","....kyyk.","...kyyk..","...kyk...","...kkk...","...kyk...","...kkk..."],pal:{k:"#0a120d",y:"#9bd35a"}}
+};
+window.paintIcons = function(root){ (root || document).querySelectorAll('canvas[data-icon]').forEach(cv => { const i = PIX[cv.dataset.icon]; if (i) paintPix(cv, i.map, i.pal); }); };
+(function(){
+  paintPix(document.getElementById('druid'), [
+    "..l......kkk",".lll....kGGGk","lylll..kGGgggk",".lll..kGgkkkgk","..w...kgksesk","..w...kgkssSk","..w..kggkkkkgk","..wkkgggbbbggk","..wsbbgbbBbbgk","..wskbbbBBbbbk",
+    "..w.kbbbyBbbbk","..w.kbyyyyybbk","..w.kbbbBbbbbk","..w.kbbbBbbbbk","..w.kbbBBbbbbk","..w.kbbbbbbbbbk","..w.kkbbbbbbbbk","..w..kkkkkkkkk","..w..kwk...kwk","..k..kkk...kkk"],
+    {k:"#0a120d",G:"#6fae4f",g:"#3f7a3a",s:"#e2b58a",S:"#b9835b",e:"#0a120d",b:"#6b4a2b",B:"#9a6f3f",w:"#8b5a2b",l:"#9bd35a",y:"#f2c94c"});
+  const cv = document.getElementById('grove'), c = cv.getContext('2d'), W = 200;
+  c.imageSmoothingEnabled = false;
+  ["#0d1f2b","#10293a","#163447","#1d4152"].forEach((col, i) => { c.fillStyle = col; c.fillRect(0, i * 7, W, 7); });
+  c.fillStyle = "#24505c"; c.fillRect(0, 28, W, 16);
+  let s = 11; const rnd = () => (s = (s * 9301 + 49297) % 233280) / 233280;
+  c.fillStyle = "#d9e8ff"; for (let i = 0; i < 30; i++) c.fillRect(Math.floor(rnd() * W), Math.floor(rnd() * 22), 1, 1);
+  [[1,0,3],[0,1,5],[0,2,5],[0,3,5],[1,4,3]].forEach(([x, y, w]) => { c.fillStyle = "#f6efc8"; c.fillRect(30 + x, 5 + y, w, 1); });
+  c.fillStyle = "#1d4152"; c.fillRect(33, 6, 2, 2);
+  [[1,0,3],[0,1,5],[1,2,3]].forEach(([x, y, w]) => { c.fillStyle = "#d9e2ef"; c.fillRect(170 + x, 9 + y, w, 1); });
+  function pine(x, base, h, col){ c.fillStyle = col; for (let y = 0; y < h; y++) { const half = Math.floor((y % 4 + Math.floor(y / 4) * 2) / 2) + 1; c.fillRect(x - half, base - h + y, half * 2 + 1, 1); } c.fillRect(x, base, 1, 2); }
+  for (let x = 2; x < W; x += 9) pine(x + Math.floor(rnd() * 4), 36, 12 + Math.floor(rnd() * 8), "#14352f");
+  c.fillStyle = "#0f2a22"; c.fillRect(0, 36, W, 8);
+  for (let x = 0; x < W; x += 13) pine(x + Math.floor(rnd() * 6), 43, 16 + Math.floor(rnd() * 10), "#0a1a14");
+  c.fillStyle = "#0a120d"; c.fillRect(0, 42, W, 2);
+  paintIcons();
+})();
+</script>
+
+<script>
+(function(){
+"use strict";
+const SH = {"shop":[[[5.5,66.4,10.7,8.8,6.6,2.1,0,0,0,0,100],[14.3,66.1,10.9,8.7,0,0,0,0,0,0,100],[22.6,66.4,11,0,0,0,0,0,0,0,77.7],[31.5,66.3,2.2,0,0,0,0,0,0,0,51],[40.3,59.7,0,0,0,0,0,0,0,0,24.6]],[[4.3,66.4,10.8,8.7,6.5,3.3,0,0,0,0,100],[13,66.3,11,8.7,1.1,0,0,0,0,0,100],[21.8,66.4,10.7,1.1,0,0,0,0,0,0,78.9],[30.5,66.2,3.2,0,0,0,0,0,0,0,51.9],[39.1,60.9,0,0,0,0,0,0,0,0,25.6]],[[3.4,66.4,10.8,8.6,6.5,3.2,1.1,0,0,0,100],[12.1,66,11,8.8,2.1,0,0,0,0,0,100],[20.8,66.3,10.7,2.3,0,0,0,0,0,0,80.2],[29.2,66.3,4.5,0,0,0,0,0,0,0,53.1],[37.9,62.1,0,0,0,0,0,0,0,0,26.7]],[[2.2,66.4,10.8,8.8,6.4,3.2,2.1,0,0,0,100],[10.8,66.5,11,8.4,3.3,0,0,0,0,0,100],[19.3,66.6,10.9,3.2,0,0,0,0,0,0,81.1],[28.1,66.4,5.5,0,0,0,0,0,0,0,54.4],[36.7,63.3,0,0,0,0,0,0,0,0,27.8]],[[1.1,66.3,10.9,8.6,6.6,3.3,2.2,1,0,0,100],[9.9,66.3,10.7,8.8,4.3,0,0,0,0,0,100],[18.7,66.2,10.8,4.3,0,0,0,0,0,0,82.3],[27,66.4,6.6,0,0,0,0,0,0,0,55.6],[36.1,63.9,0,0,0,0,0,0,0,0,29.1]],[[0,66.4,10.7,8.7,6.5,3.3,2.2,2.1,0,0,100],[8.6,66.4,10.9,8.6,5.4,0,0,0,0,0,100],[17.3,66.4,10.7,5.5,0,0,0,0,0,0,83.4],[26.1,66.3,7.6,0,0,0,0,0,0,0,57],[35,65,0,0,0,0,0,0,0,0,30.2]],[[0,65.1,10.9,8.6,6.6,3.2,2.2,3.3,0,0,100],[7.6,66.6,10.7,8.8,6.4,0,0,0,0,0,100],[16.6,66,10.9,6.5,0,0,0,0,0,0,84.1],[24.9,66.3,8.8,0,0,0,0,0,0,0,57.8],[33.6,66.4,0,0,0,0,0,0,0,0,30.8]],[[0,64,10.8,8.7,6.7,3.1,2.2,4.4,0,0,100],[6.6,66.4,10.8,8.6,6.6,1.1,0,0,0,0,100],[15,66.5,10.8,7.7,0,0,0,0,0,0,85.7],[23.8,66.3,10,0,0,0,0,0,0,0,58.5],[32.7,66.2,1.2,0,0,0,0,0,0,0,32.2]],[[0,62.9,11,8.8,6.6,3.1,2.2,5.4,0,0,100],[5.5,66.2,11,8.7,6.6,2.1,0,0,0,0,100],[14.3,66.2,11,8.5,0,0,0,0,0,0,86.7],[22.6,66.5,10.9,0,0,0,0,0,0,0,60],[31.7,66.2,2.1,0,0,0,0,0,0,0,33.2]],[[0,62,10.8,8.7,6.5,3.3,2.3,6.5,0,0,100],[4.5,66.3,10.9,8.6,6.4,3.3,0,0,0,0,100],[13.1,66.1,11.1,8.6,1.1,0,0,0,0,0,87.6],[22,65.9,11,1.1,0,0,0,0,0,0,60.8],[30.8,65.9,3.3,0,0,0,0,0,0,0,34.6]],[[0,60.6,10.9,8.8,6.7,3.3,2.2,7.5,0,0,100],[3.2,66.4,10.9,8.7,6.6,3.3,1,0,0,0,100],[12,66.3,10.7,8.7,2.2,0,0,0,0,0,88.9],[20.6,66.4,10.8,2.2,0,0,0,0,0,0,62.2],[29.2,66.5,4.4,0,0,0,0,0,0,0,35.5]]],"dun":[[[42.8,43.3,8.5,5.4,0,0,0,0,0,0],[42.2,43.8,8.8,5.3,0,0,0,0,0,0],[39,43.6,8.7,7.5,1.1,0,0,0,0,0],[39.2,43.6,8.6,7.6,1,0,0,0,0,0],[36.2,43.3,8.5,7.7,4.3,0,0,0,0,0],[55.7,43.3,1.1,0,0,0,0,0,0,0],[55.3,43.6,1.1,0,0,0,0,0,0,0],[32.7,43.5,8.7,7.5,7.6,0,0,0,0,0],[38.9,43.7,8.8,7.5,1.1,0,0,0,0,0],[44.4,43.7,8.6,3.3,0,0,0,0,0,0],[44.7,43.3,8.8,3.2,0,0,0,0,0,0],[39.4,43,8.9,7.6,1.1,0,0,0,0,0],[55.4,43.5,1.1,0,0,0,0,0,0,0],[49.9,43.5,6.6,0,0,0,0,0,0,0],[35.6,43.5,8.9,7.6,4.4,0,0,0,0,0],[39,43.6,8.6,7.7,1.1,0,0,0,0,0],[32.9,43.2,8.7,7.6,7.7,0,0,0,0,0],[55.6,43.4,1.1,0,0,0,0,0,0,0],[55.5,43.4,1.1,0,0,0,0,0,0,0]],[[40.9,43.6,8.7,6.7,0.1,0,0,0,0,0],[41,43.6,8.5,6.7,0.1,0,0,0,0,0],[37.7,43.4,8.9,7.7,2.2,0,0,0,0,0],[37.9,43.4,8.6,7.8,2.2,0,0,0,0,0],[34.6,43.5,8.8,7.5,5.4,0.1,0.1,0,0,0],[54.5,43.2,2.2,0,0,0,0,0,0,0],[54.1,43.6,2.2,0,0,0,0,0,0,0],[31.2,43.3,9.1,7.8,8.4,0.1,0.1,0,0,0],[37.8,43.8,8.6,7.5,2.2,0,0,0,0,0],[42.9,43.9,8.6,4.6,0,0,0,0,0,0],[43.4,43.3,9,4.3,0,0,0,0,0,0],[37.8,43.6,8.7,7.7,2.1,0,0,0,0,0],[54.3,43.4,2.2,0,0,0,0,0,0,0],[49.1,43.3,7.6,0.1,0,0,0,0,0,0],[35.1,43.3,8.7,7.5,5.2,0.1,0.1,0,0,0],[38,43.3,8.8,7.6,2.3,0,0,0,0,0],[31.6,43.1,8.7,7.7,8.6,0.1,0.1,0,0,0],[54.6,43.1,2.4,0,0,0,0,0,0,0],[54.2,43.6,2.2,0,0,0,0,0,0,0]],[[39.7,43.6,8.8,7.6,0.3,0,0,0,0,0],[40.2,43,8.7,7.6,0.3,0,0,0,0.1,0],[36.6,43.7,8.6,7.5,3.4,0.1,0.1,0,0,0],[36.9,43.3,8.6,7.6,3.5,0.1,0.1,0,0,0],[33.5,43.5,8.7,7.4,6.5,0.2,0.2,0,0,0],[53.1,43.3,3.5,0.1,0,0,0,0,0,0],[52.9,43.5,3.4,0.1,0,0,0,0,0,0],[30.1,43.7,8.8,7.6,9.2,0.3,0.2,0,0,0],[36.9,43.4,8.6,7.6,3.3,0.1,0.1,0,0,0],[42,43.6,8.7,5.4,0.3,0,0,0,0,0],[42.1,43.2,8.8,5.6,0.3,0,0,0,0,0],[36.7,43.3,8.7,7.5,3.5,0.1,0.1,0,0,0],[53.2,43.3,3.3,0.1,0,0,0,0,0,0],[47.7,43.1,8.8,0.3,0,0,0,0,0,0],[33.4,43.2,8.8,7.6,6.6,0.2,0.1,0,0,0],[36.8,43.3,8.9,7.5,3.3,0.1,0.1,0,0,0],[30.3,43.4,8.6,7.6,9.5,0.3,0.2,0,0,0],[53.1,43.3,3.4,0.1,0,0,0,0,0,0],[52.6,43.7,3.6,0.1,0,0,0,0,0,0]],[[38.4,43.4,8.8,7.6,1.7,0.1,0,0,0,0],[38.1,43.2,8.8,7.8,1.7,0.1,0.1,0,0.2,0],[35.3,43.3,8.7,7.6,4.6,0.2,0.2,0,0,0],[35.2,43.2,8.8,7.6,4.7,0.2,0.2,0,0,0],[31.9,43.2,8.9,7.6,7.5,0.4,0.3,0,0,0],[51.1,43.6,4.8,0.4,0.1,0,0,0,0,0],[51.6,43.2,4.7,0.4,0.1,0,0,0,0,0],[28.6,43.4,8.6,7.7,10.7,0.5,0.4,0.1,0,0],[35.2,43.2,8.6,7.7,4.7,0.3,0.2,0,0,0],[40.6,43.3,8.8,6.6,0.6,0,0,0,0,0],[40.6,43.2,8.9,6.5,0.7,0,0,0,0,0],[35.1,43.3,8.7,7.8,4.6,0.3,0.2,0,0,0],[51.1,43.8,4.6,0.4,0.1,0,0,0,0,0],[46,43.6,8.5,1.5,0.3,0,0,0,0,0],[31.9,43.6,8.5,7.7,7.7,0.3,0.3,0,0,0],[35,43.5,9,7.4,4.7,0.2,0.2,0,0,0],[28.2,43.6,8.8,7.7,10.6,0.6,0.4,0.1,0,0],[51.4,43.6,4.6,0.4,0,0,0,0,0,0],[51.3,43.5,4.8,0.4,0,0,0,0,0,0]],[[36.5,43.3,8.8,7.7,3.2,0.2,0.2,0,0,0],[36.7,43.3,8.6,7.6,3.1,0.2,0.1,0,0.3,0],[33.4,43.5,8.8,7.5,6.1,0.4,0.3,0,0,0],[33.2,43.6,8.7,7.8,5.9,0.4,0.3,0.1,0,0],[30.3,43.3,8.7,7.5,8.9,0.6,0.5,0.1,0,0],[49.5,43.7,5.7,0.7,0.5,0,0,0,0,0],[49.4,43.8,5.7,0.6,0.5,0,0,0,0,0],[26.8,43.6,8.6,7.6,11.7,0.9,0.6,0.1,0.1,0],[33.3,43.5,8.7,7.6,6,0.4,0.3,0.1,0,0],[39.1,43.3,8.7,7.6,1.2,0.1,0.1,0,0,0],[39,43.5,8.7,7.5,1.2,0.1,0.1,0,0,0],[33.4,43.6,8.7,7.7,5.8,0.4,0.3,0.1,0,0],[49.7,43.4,5.8,0.6,0.5,0,0,0,0,0],[44.5,43.3,8.6,2.6,0.8,0.1,0,0,0,0],[30.4,43.4,8.5,7.5,9,0.6,0.5,0.1,0,0],[33.3,43.5,8.6,7.8,6,0.4,0.3,0.1,0,0],[26.9,43.6,8.8,7.5,11.6,0.8,0.7,0.1,0.1,0],[49.6,43.6,5.7,0.6,0.4,0,0,0,0,0],[49.8,43.3,5.7,0.6,0.5,0.1,0,0,0,0]],[[34.9,43.4,9,7.4,4.6,0.5,0.3,0,0,0],[34.7,43.3,8.8,7.4,4.5,0.4,0.3,0.1,0.5,0],[31.7,43.2,8.7,7.6,7.4,0.6,0.5,0.1,0.1,0],[31.5,43.6,8.6,7.6,7.5,0.6,0.5,0.1,0,0],[28,43.7,8.9,7.7,10,0.9,0.7,0.1,0.1,0],[47.5,43.8,6.8,0.8,1,0.1,0.1,0,0,0],[47.9,43.4,6.8,0.7,1,0.1,0.1,0,0,0],[25.4,43.3,8.5,7.6,12.8,1.2,0.9,0.1,0.1,0],[31.6,43.2,8.8,7.7,7.4,0.7,0.5,0.1,0,0],[36.9,43.5,8.9,7.5,2.7,0.3,0.2,0,0,0],[37.2,43.3,8.8,7.4,2.8,0.3,0.2,0,0,0],[31.6,43.1,9,7.7,7.4,0.6,0.5,0.1,0,0],[47.8,43.4,6.7,0.8,1,0.1,0.1,0,0,0],[42.3,43.5,8.7,3.7,1.6,0.1,0.1,0,0,0],[28.4,43.4,8.7,7.5,10.3,0.9,0.7,0.1,0.1,0],[31.8,43.6,8.6,7.4,7.2,0.7,0.5,0.1,0,0],[25.2,43.5,8.7,7.5,12.9,1.1,0.9,0.1,0.1,0],[47.8,43.6,6.6,0.8,1,0.1,0.1,0,0,0],[47.6,43.8,6.7,0.8,1,0.1,0.1,0,0,0]],[[33,43.4,8.5,7.7,6,0.6,0.5,0.1,0.1,0],[32.7,43.2,8.6,7.3,6.1,0.6,0.6,0.1,0.8,0],[29.4,43.5,8.8,7.6,8.8,1,0.8,0.1,0.1,0],[29.5,43.6,8.6,7.6,8.9,0.9,0.8,0.1,0.1,0],[26.4,43.1,8.6,7.8,11.6,1.3,1,0.2,0.1,0],[46.1,43.3,7.6,1,1.7,0.2,0.2,0,0,0],[45.8,43.4,7.8,0.9,1.8,0.2,0.2,0,0,0],[22.9,43.5,8.7,7.5,14.2,1.6,1.2,0.2,0.1,0],[29.4,43.5,8.7,7.7,8.8,1.1,0.8,0.1,0.1,0],[34.6,43.6,8.8,7.7,4.3,0.5,0.4,0.1,0,0],[34.9,43.5,8.7,7.7,4.4,0.5,0.3,0.1,0,0],[29.7,43.4,8.6,7.6,8.9,0.9,0.8,0.1,0.1,0],[45.6,43.7,7.8,0.9,1.7,0.2,0.2,0,0,0],[40.2,43.6,8.8,4.7,2.3,0.3,0.2,0,0,0],[26.3,43.8,8.7,7.5,11.2,1.3,1,0.2,0.1,0],[29.7,43,8.9,7.6,8.9,0.9,0.8,0.1,0.1,0],[23,43.3,8.7,7.7,14.3,1.5,1.2,0.2,0.1,0],[45.6,43.4,8,0.9,1.7,0.2,0.1,0,0,0],[45.8,43.5,7.7,0.9,1.7,0.2,0.2,0,0,0]],[[30.5,43.4,8.9,7.5,7.8,1,0.8,0.1,0.1,0],[30.5,43.2,8.6,7.5,7.3,1,0.8,0.1,1,0],[27.2,43.4,8.8,7.6,10.3,1.5,1.1,0.2,0.1,0],[27,43.6,8.7,7.7,10.3,1.4,1,0.2,0.1,0],[24.4,43.1,8.7,7.6,12.9,1.6,1.3,0.2,0.1,0],[43.6,43.2,8.9,1.1,2.5,0.4,0.3,0,0,0],[43.3,43.4,8.9,1.1,2.7,0.3,0.3,0,0,0],[21.5,42.5,8.9,7.6,15.5,2,1.6,0.2,0.1,0],[27.3,43.5,8.6,7.6,10.3,1.4,1.1,0.1,0.1,0],[32.9,43.4,8.7,7.6,5.9,0.8,0.6,0.1,0.1,0],[33,43.3,8.8,7.7,5.7,0.8,0.6,0.1,0.1,0],[27.4,43.6,8.6,7.5,10.2,1.3,1.1,0.2,0.1,0],[43.5,43.6,8.5,1.1,2.6,0.4,0.3,0,0,0],[38.2,43.3,8.8,5.7,3.2,0.4,0.4,0,0,0],[24.3,43.1,8.8,7.7,12.6,1.7,1.4,0.2,0.1,0],[27.1,43.7,8.7,7.7,10.2,1.3,1,0.2,0.1,0],[21.4,42.6,8.6,7.5,15.7,2.1,1.5,0.2,0.1,0],[43.4,43.6,8.7,1.1,2.5,0.4,0.3,0.1,0,0],[44,43,8.7,1.1,2.5,0.4,0.3,0,0,0]],[[28.4,43.2,8.7,7.6,9.1,1.5,1.2,0.2,0.1,0],[28.6,42.7,8.3,7.6,8.8,1.5,1.1,0.1,1.3,0],[25.5,42.8,8.7,7.7,11.7,1.9,1.4,0.2,0.1,0],[25.7,42.5,8.8,7.7,11.6,1.9,1.4,0.2,0.1,0],[22.7,42.5,8.8,7.5,13.9,2.4,1.9,0.3,0.1,0],[41.2,43.4,8.7,2.2,3.3,0.6,0.4,0.1,0,0],[41.1,43.5,8.7,2.1,3.4,0.6,0.5,0.1,0,0],[19.7,42.1,8.9,7.6,16.6,2.5,2.2,0.3,0.2,0],[25.3,42.7,8.9,7.8,11.7,1.9,1.4,0.2,0.1,0],[30.2,43.6,8.7,7.6,7.5,1.2,0.9,0.2,0.1,0],[30.4,43.5,8.6,7.5,7.5,1.2,1,0.2,0.1,0],[25.5,42.8,8.7,7.5,11.9,1.9,1.4,0.2,0.1,0],[41.4,43.3,8.7,2.2,3.4,0.5,0.4,0.1,0,0],[35.7,43.5,8.7,6.6,4.1,0.7,0.5,0.1,0.1,0],[22.7,42.3,8.7,7.6,14.2,2.4,1.8,0.3,0.1,0],[25.6,42.7,8.6,7.7,11.7,1.8,1.5,0.2,0.1,0],[20.1,41.5,8.7,7.6,16.8,2.6,2.2,0.3,0.2,0],[41,43.7,8.8,2.1,3.5,0.5,0.4,0.1,0,0],[40.8,43.7,8.8,2.1,3.4,0.6,0.5,0.1,0.1,0]],[[26.6,42.4,8.7,7.7,10.8,1.9,1.6,0.2,0.1,0],[26.8,41.5,8.6,7.5,10.4,1.9,1.5,0.2,1.7,0],[24.2,41.9,8.6,7.6,12.9,2.3,1.8,0.3,0.2,0],[23.8,42,8.7,7.7,13.1,2.4,1.8,0.3,0.2,0],[21.4,40.9,8.8,7.5,15.4,3,2.4,0.3,0.2,0],[38.8,43.3,8.8,3.1,4.4,0.9,0.6,0.1,0.1,0],[38.4,43.6,8.8,3.2,4.4,0.8,0.6,0.1,0,0],[18.5,40.5,8.9,7.7,17.8,3.3,2.7,0.4,0.2,0],[24.5,41.5,8.7,7.8,13,2.2,2,0.2,0.2,0],[28.6,42.8,8.7,7.6,8.8,1.8,1.4,0.2,0.1,0],[28.5,42.8,8.7,7.7,9.1,1.6,1.4,0.2,0.1,0],[23.7,41.9,8.7,7.6,13.2,2.4,2,0.3,0.2,0],[38.7,43.4,8.6,3.1,4.5,0.9,0.7,0.1,0,0],[33,43.4,8.8,7.6,5.2,1,0.8,0.1,0.1,0],[21.9,41,8.7,7.5,15.2,2.9,2.2,0.4,0.2,0],[24.1,41.6,8.8,7.7,12.9,2.5,1.9,0.3,0.2,0],[18.7,40.5,8.6,7.7,18,3.2,2.7,0.4,0.2,0],[38.6,43.7,8.4,3.1,4.5,0.8,0.7,0.1,0.1,0],[38.6,43.6,8.5,3.2,4.5,0.8,0.6,0.1,0.1,0]],[[25.3,40.9,8.6,7.7,12.3,2.5,2.1,0.3,0.2,0],[25.1,40.6,8.5,7.4,11.7,2.4,1.9,0.3,2.1,0],[22.7,40.4,8.6,7.5,14.4,3.1,2.5,0.4,0.2,0],[22.7,40.2,8.7,7.6,14.6,3.1,2.5,0.4,0.2,0],[19.9,40,8.6,7.5,16.7,3.7,2.8,0.4,0.3,0],[36.1,43.1,8.7,4.3,5.5,1.2,1,0.1,0.1,0],[36,43.3,8.8,4.1,5.6,1.2,1,0.1,0.1,0],[17.3,39,8.8,7.6,19.1,4.1,3.3,0.5,0.3,0],[22.9,40.2,8.8,7.4,14.5,3.1,2.5,0.4,0.2,0],[27.2,41.2,8.7,7.8,10.7,2.2,1.8,0.3,0.2,0],[27,41.6,8.6,7.6,10.7,2.3,1.8,0.3,0.2,0],[22.4,40.5,8.6,7.7,14.4,3.1,2.6,0.4,0.2,0],[35.7,43.7,8.8,4,5.5,1.1,1,0.1,0.1,0],[31.2,42.6,8.7,7.7,6.8,1.5,1.2,0.2,0.1,0],[20.2,39.4,8.6,7.7,16.9,3.6,2.9,0.4,0.3,0],[22.7,40.5,8.6,7.4,14.6,3,2.6,0.4,0.2,0],[17.4,38.8,8.9,7.6,19.3,3.9,3.2,0.5,0.3,0],[36,43.6,8.7,4.2,5.4,1.1,0.9,0.2,0.1,0],[35.8,43.3,8.8,4.3,5.4,1.2,1,0.1,0.1,0]]],"star":[[[54.1,43.6,2.3,0,0,0,0,0,0,0],[53.2,43.6,3.1,0,0,0,0,0,0,0],[52.2,43.4,4.4,0,0,0,0,0,0,0],[51.1,43.5,5.4,0,0,0,0,0,0,0],[50.2,43.4,6.5,0,0,0,0,0,0,0],[48.8,43.4,7.8,0,0,0,0,0,0,0],[47.7,43.7,8.7,0,0,0,0,0,0,0],[46.9,43.4,8.6,1.1,0,0,0,0,0,0],[45.4,43.4,9,2.3,0,0,0,0,0,0],[44.7,43.4,8.5,3.4,0,0,0,0,0,0],[43.7,43.4,8.5,4.3,0,0,0,0,0,0],[42.3,43.7,8.7,5.3,0,0,0,0,0,0],[41.3,43.4,8.7,6.5,0,0,0,0,0,0],[40,43.9,8.7,7.4,0,0,0,0,0,0],[38.9,43.7,8.7,7.6,1.1,0,0,0,0,0]],[[53.1,43.6,3.3,0,0,0,0,0,0,0],[51.9,43.8,4.3,0,0,0,0,0,0,0],[51,43.5,5.5,0,0,0,0,0,0,0],[49.8,43.5,6.7,0,0,0,0,0,0,0],[48.7,43.6,7.6,0.1,0,0,0,0,0,0],[47.6,43.5,8.8,0.1,0,0,0,0,0,0],[46.8,43.5,8.5,1.2,0,0,0,0,0,0],[45.4,43.5,8.9,2.2,0,0,0,0,0,0],[44.3,43.6,8.7,3.4,0,0,0,0,0,0],[43.5,43.3,8.7,4.5,0,0,0,0,0,0],[42.6,43.5,8.6,5.2,0.1,0,0,0,0,0],[41.6,43,8.9,6.5,0.1,0,0,0,0,0],[40.1,43.4,8.7,7.7,0.1,0,0,0,0,0],[38.8,43.7,8.8,7.5,1.2,0,0,0,0,0],[37.9,43.4,8.8,7.6,2.3,0,0,0,0,0]],[[51.7,43.6,4.5,0.2,0,0,0,0,0,0],[51.1,43.2,5.5,0.2,0,0,0,0,0,0],[49.4,43.6,6.8,0.2,0,0,0,0,0,0],[48.2,43.9,7.6,0.3,0,0,0,0,0,0],[47.1,43.7,8.8,0.3,0,0,0,0,0,0],[46.2,43.7,8.6,1.4,0.1,0,0,0,0,0],[45.3,43.5,8.8,2.4,0.1,0,0,0,0,0],[44,43.6,8.7,3.5,0.2,0,0,0,0,0],[43.3,43.2,8.8,4.5,0.2,0,0,0,0,0],[42.4,43.3,8.7,5.4,0.2,0,0,0,0,0],[40.9,43.6,8.6,6.6,0.3,0,0,0,0,0],[40,43.5,8.6,7.5,0.3,0,0,0,0,0],[38.7,43.6,8.8,7.6,1.3,0,0,0,0,0],[37.6,43.5,8.9,7.5,2.4,0.1,0.1,0,0,0],[36.3,43.6,8.8,7.6,3.4,0.1,0.1,0,0,0]],[[50.5,43.5,5.5,0.5,0.1,0,0,0,0,0],[48.9,43.6,6.9,0.5,0.2,0,0,0,0,0],[48.3,43.4,7.6,0.4,0.3,0,0,0,0,0],[47.3,43.3,8.7,0.4,0.3,0,0,0,0,0],[45.7,43.6,8.8,1.6,0.4,0,0,0,0,0],[44.9,43.3,8.7,2.6,0.4,0,0,0,0,0],[43.7,43.7,8.5,3.5,0.5,0,0,0,0,0],[42.6,43.6,8.8,4.5,0.5,0,0,0,0,0],[41.6,43.4,8.7,5.7,0.6,0,0,0,0,0],[40.4,43.6,8.6,6.6,0.6,0,0,0,0,0],[39.2,43.8,8.7,7.5,0.7,0,0,0,0,0],[38.5,43.3,8.7,7.6,1.7,0.1,0.1,0,0,0],[37.5,43.3,8.8,7.6,2.6,0.1,0.1,0,0,0],[36.1,43.7,8.6,7.4,3.7,0.2,0.1,0,0,0],[35.2,43.5,8.7,7.4,4.7,0.2,0.2,0,0,0]],[[48.6,43.6,6.6,0.6,0.5,0,0,0,0,0],[47.5,43.6,7.6,0.6,0.6,0,0,0,0,0],[46.3,43.4,8.8,0.6,0.7,0.1,0,0,0,0],[45.4,43.4,8.8,1.6,0.8,0.1,0,0,0,0],[44,43.6,8.8,2.6,0.9,0.1,0.1,0,0,0],[43.4,43.1,8.8,3.7,1,0.1,0.1,0,0,0],[42.1,43.6,8.5,4.6,1,0.1,0.1,0,0,0],[41.2,43.4,8.7,5.5,1.1,0.1,0.1,0,0,0],[39.8,43.4,8.8,6.6,1.2,0.1,0.1,0,0,0],[39,43.4,8.6,7.7,1.2,0.1,0.1,0,0,0],[37.8,43.3,8.8,7.7,2.2,0.2,0.1,0,0,0],[36.8,43.2,8.8,7.6,3.1,0.2,0.2,0,0,0],[35.6,43.4,8.7,7.5,4.2,0.3,0.2,0,0,0],[34.3,43.5,8.7,7.7,5.1,0.4,0.3,0,0,0],[33.5,43.2,8.8,7.7,6.1,0.4,0.4,0,0,0]],[[46.4,43.7,7.8,0.8,1.1,0.1,0.1,0,0,0],[45.8,43.3,8.7,0.8,1.2,0.1,0.1,0,0,0],[44.9,43,8.8,1.8,1.3,0.1,0.1,0,0,0],[43.6,43.6,8.5,2.7,1.4,0.1,0.1,0,0,0],[42.4,43.5,8.8,3.6,1.4,0.2,0.1,0,0,0],[40.9,43.6,8.9,4.7,1.6,0.1,0.1,0,0,0],[40.4,43.5,8.5,5.6,1.6,0.1,0.1,0,0,0],[39.2,43.3,8.7,6.7,1.7,0.2,0.1,0,0,0],[38.3,43.2,8.8,7.5,1.9,0.2,0.1,0,0,0],[37.1,43.4,8.8,7.6,2.6,0.2,0.2,0,0,0],[35.9,43.3,8.6,7.7,3.7,0.3,0.3,0,0,0],[34.9,43.4,8.7,7.6,4.5,0.4,0.4,0.1,0,0],[33.9,43.4,8.7,7.5,5.6,0.5,0.3,0.1,0,0],[33,43.2,8.8,7.6,6.3,0.6,0.5,0.1,0,0],[31.5,43.7,8.6,7.6,7.4,0.6,0.6,0.1,0,0]],[[44.6,43.6,8.5,0.9,2,0.2,0.2,0,0,0],[43.8,43.4,8.7,1.8,1.9,0.2,0.2,0,0,0],[42.5,43.7,8.6,2.8,2,0.2,0.1,0,0,0],[41.4,43.6,8.6,3.8,2.2,0.3,0.2,0,0,0],[40.2,43.7,8.8,4.6,2.2,0.3,0.2,0,0,0],[39.5,42.9,8.9,5.8,2.4,0.3,0.2,0,0,0],[38,43.3,9,6.7,2.5,0.3,0.2,0,0,0],[37.4,42.8,8.9,7.6,2.7,0.3,0.2,0,0,0],[36.2,43.1,8.7,7.8,3.4,0.4,0.2,0,0,0],[35,43.5,8.7,7.5,4.3,0.5,0.4,0.1,0,0],[33.6,43.5,8.8,7.5,5.4,0.6,0.5,0.1,0,0],[32.7,43.4,8.5,7.7,6.2,0.7,0.5,0.1,0.1,0],[31.4,43.5,8.9,7.6,7.1,0.8,0.6,0.1,0,0],[30.5,43.4,8.8,7.6,7.9,0.9,0.7,0.1,0.1,0],[29.4,43.8,8.5,7.7,8.8,0.9,0.7,0.1,0.1,0]],[[42.1,43.9,8.6,2,2.6,0.4,0.3,0,0,0],[41.4,43.3,8.6,3,2.9,0.3,0.3,0,0,0],[40.3,43.3,8.8,4,2.9,0.4,0.3,0,0,0],[39.3,43.4,8.8,4.7,3.1,0.4,0.3,0,0,0],[38.3,43.2,9,5.5,3.3,0.4,0.3,0.1,0,0],[37,43.4,8.7,6.6,3.4,0.4,0.3,0.1,0,0],[36.1,43.4,8.6,7.6,3.5,0.4,0.3,0.1,0,0],[34.8,43.6,8.6,7.7,4.2,0.6,0.5,0.1,0,0],[33.6,43.8,8.6,7.6,5,0.7,0.5,0.1,0,0],[32.7,43.6,8.5,7.5,6,0.8,0.6,0.1,0,0],[31.8,43.4,8.6,7.5,6.9,0.9,0.7,0.1,0.1,0],[30.5,43.3,8.5,7.9,7.7,1,0.8,0.2,0.1,0],[29.7,43.6,8.6,7.5,8.4,1.1,0.9,0.1,0.1,0],[28.4,43.7,8.7,7.6,9.2,1.2,1,0.1,0.1,0],[27.1,43.4,8.7,7.6,10.4,1.3,1.1,0.2,0.1,0]],[[40.1,43.4,8.6,3,3.8,0.6,0.5,0.1,0,0],[38.8,43.8,8.6,4,3.7,0.5,0.4,0.1,0,0],[38.1,43.2,8.6,5,3.8,0.7,0.5,0.1,0,0],[36.9,43.6,8.7,5.7,3.9,0.6,0.5,0.1,0,0],[35.7,43.6,8.7,6.7,4,0.6,0.6,0.1,0.1,0],[34.7,43.4,8.7,7.7,4.2,0.7,0.5,0.1,0.1,0],[33.4,43.6,8.7,7.7,5,0.8,0.6,0.1,0.1,0],[32.6,43.3,8.6,7.8,5.9,0.9,0.8,0.1,0.1,0],[31.4,43.2,8.9,7.6,6.8,1.1,0.8,0.1,0.1,0],[30.4,43.4,8.6,7.7,7.5,1.2,1,0.2,0.1,0],[29.3,43.3,8.7,7.7,8.5,1.3,1,0.1,0.1,0],[28.1,43.5,8.6,7.6,9.4,1.4,1.1,0.2,0.1,0],[27.5,43.2,8.8,7.5,9.9,1.6,1.2,0.2,0.1,0],[26.3,43,8.8,7.6,10.8,1.7,1.4,0.2,0.1,0],[25.5,42.8,8.8,7.6,11.6,1.9,1.4,0.2,0.1,0]],[[37.5,43.6,8.6,4.2,4.4,0.9,0.7,0.1,0.1,0],[36.6,43.4,8.7,4.9,4.7,0.8,0.7,0.1,0.1,0],[35.2,43.5,8.7,5.8,4.9,1,0.7,0.1,0.1,0],[34.3,43.6,8.8,6.6,4.8,1,0.7,0.1,0.1,0],[33.3,43.1,8.7,7.8,5.1,1,0.7,0.1,0.1,0],[32.1,43.5,8.8,7.5,5.9,1.1,0.8,0.1,0.1,0],[31.3,43,8.7,7.6,6.9,1.2,1,0.2,0.1,0],[30.4,43.1,8.7,7.5,7.5,1.4,1.1,0.2,0.1,0],[29.5,42.9,8.7,7.4,8.4,1.5,1.3,0.2,0.1,0],[28.3,43,8.9,7.5,9.1,1.6,1.3,0.2,0.1,0],[27.6,42.6,8.8,7.4,9.9,1.9,1.5,0.2,0.1,0],[26.7,42.1,8.6,7.5,10.9,2.1,1.6,0.2,0.2,0],[26.2,41.8,8.6,7.7,11.5,2.1,1.6,0.2,0.1,0],[24.9,41.8,8.7,7.6,12.4,2.3,1.8,0.3,0.1,0],[24,41.8,8.6,7.6,13.1,2.4,1.9,0.3,0.2,0]],[[34.8,43.5,8.7,4.9,5.7,1.3,1,0.1,0.1,0],[33.9,43.4,8.7,5.8,5.7,1.2,0.9,0.1,0.1,0],[32.9,42.9,8.7,6.9,5.8,1.4,1.1,0.2,0.1,0],[32.4,42.5,8.7,7.7,6.2,1.3,1,0.1,0.1,0],[31.4,42.6,8.7,7.5,6.8,1.5,1.2,0.2,0.1,0],[30.5,42.5,8.6,7.7,7.5,1.6,1.3,0.2,0.1,0],[29.4,42.5,8.7,7.4,8.5,1.7,1.4,0.2,0.1,0],[28.9,42,8.6,7.6,9.1,1.9,1.6,0.3,0.1,0],[27.9,41.9,8.5,7.5,9.8,2.2,1.7,0.3,0.1,0],[27.5,41.3,8.6,7.4,10.7,2.3,1.8,0.3,0.1,0],[26.3,41.3,8.8,7.7,11.2,2.4,1.8,0.3,0.2,0],[25.2,40.9,8.6,7.7,12.3,2.7,2.1,0.3,0.2,0],[24.4,40.7,8.7,7.7,12.9,2.8,2.2,0.4,0.2,0],[23.5,40.9,8.5,7.6,13.7,3,2.3,0.3,0.2,0],[22.8,40.3,8.8,7.6,14.3,3.2,2.4,0.4,0.2,0]]]};
+
+// ── the old tables ──────────────────────────────────────────────
+const MET = ['Iron','Steel','Silver','Elven','Dwarven','Mithril','Adamantium','Ebony','Orcish','Daedric'];
+const MET_LABEL = MET.map(m => m === 'Adamantium' ? 'Adaman\u00ADtium' : m);
+const MET_BONUS = [-1,0,0,1,2,3,3,4,5,6];
+const MET_PLATE = [7,9,9,11,13,15,15,17,19,21];
+const MET_ROOM = [0.75,1,1.75,1.25,1.5,1.25,1.75,2,2.5,3];
+const MET_WORD = [
+  'The weakest metal. Every picky foe takes less damage from it.',
+  'The baseline. Fine for most foes; ghosts, harpies and daedra take less.',
+  'Works like steel on most foes, but does full damage to ghosts, wraiths, vampires and werecreatures.',
+  'A small step up from steel. Harpies still need one tier more.',
+  'Full damage to harpies. Daedra still take less.',
+  'The key metal: full damage to every daedra, lich and ancient vampire.',
+  'As good as mithril in a fight, and it holds more enchantment.',
+  'Strong and heavy, and it holds twice a steel item’s enchantment.',
+  'Even stronger. Orcs carry it, and shops in Orsinium sell it.',
+  'The best metal. Nothing is beyond it, and daedra drop it themselves.'
+];
+const WANTS = [
+  {need:1, label:'Steel', foes:['Imp']},
+  {need:2, label:'Silver', foes:['Werewolf','Wereboar','Nymph','Ghost','Mummy','Wraith','Vampire']},
+  {need:4, label:'Dwarven', foes:['Harpy']},
+  {need:5, label:'Mithril', foes:['Gargoyle','Fire Daedra','Frost Daedra','Daedroth','Daedra Seducer','Daedra Lord','Ancient Vampire','Lich','Ancient Lich']}
+];
+const biteOf = (have, need) => have >= need ? 100 : Math.max(10, 100 - 20 * (need - have));
+
+const SHOPS = [
+  {glyph:'5', metal:'Best', line:'Incense and soft music soothe your nerves', nick:'incense shop', q:'quality 18–20', buy:[1447,1813], sell:[427,476], verdict:'Sell all your loot here. Best odds of rare metal on the shelves.'},
+  {glyph:'4', metal:'Good', line:'The shop is better appointed than many', nick:'fine shop', q:'quality 14–17', buy:[1255,1575], sell:[373,413], verdict:'A good place to sell. At the very top of this tier it stocks like an incense shop.'},
+  {glyph:'3', metal:'Average', line:'laid out in a practical and straightforward manner', nick:'plain shop', q:'quality 8–13', buy:[1023,1289], sell:[304,338], verdict:'Fair prices both ways. Pawn shops start selling magic items around here.'},
+  {glyph:'2', metal:'Poor', line:'Sturdy shelves, cobbled together out of scrap lumber', nick:'scrap-wood stall', q:'quality 4–7', buy:[847,1065], sell:[250,276], verdict:'Cheap plain goods. Don’t sell your loot here.'},
+  {glyph:'1', metal:'Worst', line:'Rusty relics lie wherever they were last tossed', nick:'junk shop', q:'quality 1–3', buy:[675,855], sell:[201,222], verdict:'Plain goods for about half price. Never sell here.'}
+];
+
+const FAMS = {
+  Undead:['Graveward','The Warden','Aegis of Dawn','The Visor of King Lysandus'],
+  Daedra:['Warp-Edge','Orsinium’s Anvil','The Amulet of the Nine'],
+  Dragon:['Wyrmbane','The Mountain’s Root'],
+  Beast:['Stormcaller’s Bow','The Glenmoril Bow','Foxglove','The Mark of the Hist'],
+  Brute:['Titanheart','Gortwog’s Cleaver','The Reachman’s Torc'],
+  Caster:['The Direnni Staff','Archmage’s Loop','Worm’s Tooth','The Witch-Sisters’ Ring'],
+  Rogue:['Nightwhisper','Tsaesci Fang','The Night Mother’s Embrace','The Wayrest Courier’s Treads'],
+  Warrior:['Ansei’s Edge','Gauntlets of the Rose','The Raven’s Wings','The Wall of Daggerfall','King’s Mark','The Duelist’s Vambrace']
+};
+const FAM_KEYS = Object.keys(FAMS);
+
+// d, name, metal rank (-1 = by your level), magic tier, daedra slots of 8, family, foes at the top of its table
+const DUN = [
+  [7,'Coven',21,13,4,'Caster',['Mage','Sorcerer','Battlemage','Spellsword','Daedra Seducer','Fire Daedra','Frost Daedra','Daedra Lord']],
+  [16,'Volcanic Caves',21,18,3,'Daedra',['Fire Atronach','Iron Atronach','Mage','Wraith','Daedroth','Fire Daedra','Daedra Lord','Ancient Lich']],
+  [4,'Desecrated Temple',18,15,5,'Daedra',['Wraith','Daedroth','Daedra Seducer','Monk','Frost Daedra','Fire Daedra','Dragonling','Daedra Lord']],
+  [14,'Dragon’s Den',18,18,1,'Dragon',['Nightblade','Mage','Knight','Vampire','Battlemage','Thief','Ancient Lich','Daedra Lord']],
+  [8,'Vampire Haunt',15,14,0,'Undead',['Vampire','Ancient Vampire','Wraith']],
+  [15,'Barbarian Stronghold',15,11,0,'Warrior',['Spider','Warrior','Vampire','Rogue','Barbarian','Ancient Vampire','Sorcerer','Ancient Lich']],
+  [2,'Human Stronghold',-1,6,0,'Warrior',['Barbarian','Orc Warlord','Archer','Wraith','Spellsword','Orc Shaman','Warrior','Vampire']],
+  [3,'Prison',-1,5,0,'Rogue',['Assassin','Zombie','Nightblade','Iron Atronach','Wraith','Ghost','Burglar']],
+  [11,'Ruined Castle',-1,6,0,'Undead',['Knight','Ghost','Wraith','Warrior','Lich','Ancient Lich','Ancient Vampire']],
+  [0,'Crypt',12,9,0,'Undead',['Zombie','Ghost','Wraith','Vampire','Ancient Vampire','Lich']],
+  [1,'Orc Stronghold',12,9,1,'Brute',['Spider','Orc Shaman','Orc Warlord','Giant Scorpion','Daedroth']],
+  [9,'Laboratory',10,10,1,'Caster',['Gargoyle','Daedroth','Sorcerer','Mage','Lich','Ancient Lich']],
+  [10,'Harpy Nest',10,7,3,'Beast',['Nightblade','Harpy','Rogue','Vampire','Daedra Seducer','Daedra Lord']],
+  [13,'Giant Stronghold',5,8,3,'Brute',['Orc Shaman','Giant','Daedroth','Fire Daedra','Dragonling','Orc Warlord','Frost Daedra']],
+  [5,'Mine',0,4,1,'',['Warrior','Ice Atronach','Iron Atronach','Fire Daedra','Thief','Vampire','Nightblade','Ancient Vampire']],
+  [6,'Natural Cave',0,4,0,'Beast',['Giant Scorpion','Orc Shaman','Ghost','Warrior','Monk','Barbarian','Dragonling','Lich']],
+  [12,'Spider Nest',0,5,0,'Beast',['Thief','Ghost','Mummy','Spider','Wraith','Assassin','Lich']],
+  [17,'Scorpion Nest',0,5,3,'Beast',['Wraith','Healer','Giant Scorpion','Nightblade','Daedra Seducer','Daedroth','Daedra Lord']],
+  [18,'Cemetery',0,3,0,'Undead',['Orc','Imp','Zombie','Mummy','Bard','Rogue','Rat']]
+];
+
+const SOURCES = [
+  {id:'rat', name:'A rat', kind:'corpse', tier:1, fam:'Beast'},
+  {id:'skel', name:'Skeletal Warrior', kind:'corpse', tier:9, fam:'Undead'},
+  {id:'wraith', name:'Wraith', kind:'corpse', tier:15, fam:'Undead'},
+  {id:'boss', name:'Daedra Lord', kind:'corpse', tier:20, boss:true, fam:'Daedra', note:'Any Daedra, and any foe of level 18 or more, rolls as a boss.'},
+  {id:'mine', name:'Pile in a Mine', kind:'pile', tier:4, fam:''},
+  {id:'coven', name:'Pile in a Coven', kind:'pile', tier:13, fam:'Caster'},
+  {id:'den', name:'Pile in a Dragon’s Den', kind:'pile', tier:18, fam:'Dragon'}
+];
+const RARITY = [
+  {id:'common', label:'Common', c:'--r0', word:'plain'},
+  {id:'magic', label:'Magic', c:'--r1', word:'one or two lines'},
+  {id:'rare', label:'Rare', c:'--r2', word:'three or four lines, a two-part name'},
+  {id:'legendary', label:'Legendary', c:'--r3', word:'a named record with its own power'},
+  {id:'aetheric', label:'Aetheric', c:'--r4', word:'a boss’s set piece, never rolled'},
+  {id:'artifact', label:'Artifact', c:'--r5', word:'Daggerfall’s own, from quests and princes'},
+  {id:'gilded', label:'Gilded', c:'--r6', word:'one item, the Hourlock'}
+];
+const W = {magic:{base:100, per:15, cap:600}, rare:{base:15, per:6, cap:260}, legendary:{base:1, per:1.2, cap:45}};
+const SRC_MULT = {corpse:1, pile:1.3, boss:2.5};
+const luckMult = (l) => Math.max(0.5, Math.min(1.5, 1 + (l - 50) / 100));
+function chances(src, luck, find){
+  const m = src.boss ? SRC_MULT.boss : SRC_MULT[src.kind];
+  const lk = luckMult(luck);
+  const at = (w) => Math.max(0, Math.min(w.cap, (w.base + w.per * src.tier) * m * lk));
+  const magic = at(W.magic), rare = Math.min(magic, at(W.rare));
+  const legendary = Math.min(rare, at(W.legendary) * find);
+  return {magic, rare, legendary};
+}
+const droughtMult = (n) => Math.min(3, 1 + 0.2 * Math.floor(n / 25));
+
+const GUILD_TITLES = {
+  'Mages Guild':['Apprentice','Journeyman','Evoker','Conjurer','Magician','Enchanter','Warlock','Wizard','Master Wizard','Archmage'],
+  'Fighters Guild':['Apprentice','Journeyman','Swordsman','Protector','Defender','Warder','Guardian','Champion','Warrior','Master'],
+  'Thieves Guild':['Apprentice','Journeyman','Filcher','Crook','Robber','Bandit','Thief','Ringleader','Mastermind','Master Thief'],
+  'Dark Brotherhood':['Apprentice','Journeyman','Operator','Slayer','Executioner','Punisher','Terminator','Assassin','Dark Brother','Master Assassin']
+};
+const OPENS = [];
+const opens = (who, list) => list.forEach(([r, what]) => OPENS.push({who, r, what}));
+opens('Mages Guild', [[2,'the library'],[3,'buy magic items'],[4,'buy soul gems'],[5,'make magic items'],[6,'Daedra summoning, and the hall at any hour'],[8,'teleport']]);
+opens('Fighters Guild', [[6,'the hall at any hour']]);
+opens('Thieves Guild', [[2,'sell magic items'],[4,'the Spymaster']]);
+opens('Dark Brotherhood', [[1,'buy potions'],[3,'make potions'],[5,'buy soul gems'],[7,'the Spymaster']]);
+opens('Knightly orders', [[4,'free tavern rooms everywhere'],[6,'free ship travel'],[9,'a house']]);
+const TEMPLES = [
+  ['Akatosh',{library:2, heal:1, potions:[4,5], summon:7}],
+  ['Arkay',{library:3, heal:0, potions:[1,4], gems:4, summon:7}],
+  ['Dibella',{library:4, heal:2, potions:[1,5], summon:7}],
+  ['Julianos',{library:0, heal:2, items:[3,5], summon:6}],
+  ['Kynareth',{library:4, heal:1, spells:[3,6], summon:7}],
+  ['Mara',{library:4, heal:1, potions:[2,5], summon:7}],
+  ['Stendarr',{library:4, heal:0, potions:[2,5], summon:7}],
+  ['Zenithar',{library:4, heal:1, potions:[1,6], summon:8}]
+];
+TEMPLES.forEach(([god, t]) => {
+  const who = 'Temple of ' + god;
+  const l = [[t.library,'the library'],[t.heal,'free healing'],[t.summon,'Daedra summoning']];
+  if (t.potions) l.push([t.potions[0],'buy potions'],[t.potions[1],'make potions']);
+  if (t.spells) l.push([t.spells[0],'buy spells'],[t.spells[1],'make spells']);
+  if (t.items) l.push([t.items[0],'buy magic items'],[t.items[1],'make magic items']);
+  if (t.gems) l.push([t.gems,'buy soul gems']);
+  opens(who, l);
+});
+
+const ITEMS = [
+  ['Amulet',2300,0],['Torc',2050,0],['Ring',1800,0],['Bracelet',1750,0],['Bracer',1500,0],['Wand',1200,0],['Mark',800,0],
+  ['Tower Shield',1500,1],['Kite Shield',1000,1],['Helm',900,1],['Round Shield',650,1],['Buckler',500,1],['Cuirass',400,1],['Gauntlets',400,1],
+  ['Staff',700,1],['Claymore',700,1],['Dai-katana',700,1],['Longsword',600,1],['Katana',600,1],['Warhammer',550,1],['Saber',525,1],['Battle Axe',525,1],['Mace',500,1],['Broadsword',500,1],['Long Bow',350,1],
+  ['Plain Robes',700,0]
+];
+const POWERS = [
+  ['p-mag-season','+75 magicka in its season',500],['p-mag-moon','+75 magicka in a moon phase',200],['p-mag-daedra','+75 magicka near daedra',800],
+  ['p-regen','Regenerate health, always',4000],['p-regen-dark','Regenerate health in darkness',3000],
+  ['p-vamp','Heals you as it strikes (weapons)',1000],['p-potent-daedra','Potent vs daedra (weapons)',900],['p-potent-undead','Potent vs undead (weapons)',800],
+  ['p-rep-all','Good reputation with all',5000],['p-repair','Repairs worn gear',900],['p-trolls','Troll’s Blood, while worn',920],['p-absorb','Spell Absorption, while worn',1720],['p-armor','Strengthens Armor',700],['p-skill','Enhances a skill',900],
+  ['p-hearing','Hearing',500],['p-athletic','Athleticism',600],['p-weight','Weight allowance +50%',600]
+];
+const DRAWS = [
+  ['d-sun','You take damage in sunlight',6000],['d-rep','Bad reputation with all',5000],['d-leech','Drains your health when used',4000],
+  ['d-decay','Wears out all the time',3000],['d-holy','You take damage in holy places',1000],['d-under','Bad reputation with Underworld',1000],['d-weight','Extra weight',100]
+];
+const SOULS = [
+  ['s-lord','Daedra Lord',8000],['s-dragonling','Dragonling',5000],['s-alich','Ancient Lich',2500],['s-seducer','Daedra Seducer',1500],
+  ['s-lich','Lich',1000],['s-vampire','Vampire',700],['s-firedaedra','Fire Daedra',500],['s-wraith','Wraith',300]
+];
+const BIND_ALL = {};
+POWERS.forEach(([id,n,c]) => BIND_ALL[id] = {n, c, kind:'take'});
+DRAWS.forEach(([id,n,c]) => BIND_ALL[id] = {n, c, kind:'give'});
+SOULS.forEach(([id,n,c]) => BIND_ALL[id] = {n:n + '’s soul', c, kind:'give'});
+
+const STAGES = [
+  {name:'Faint', lo:1, hi:9, kept:62.5, heal:8, rp:3},
+  {name:'Kindled', lo:10, hi:19, kept:68.75, heal:9, rp:4.5},
+  {name:'Bright', lo:20, hi:29, kept:75, heal:10, rp:6},
+  {name:'Radiant', lo:30, hi:39, kept:81.25, heal:11, rp:7.5},
+  {name:'Ascendant', lo:40, hi:50, kept:87.5, heal:12, rp:9}
+];
+const xpFor = (L) => { const n = Math.max(1, Math.min(50, L)) - 1; return 10 * Math.floor((n*n*n*(n+10) + 300*n) / 30); };
+const killXp = (foeL, R) => Math.floor(10 * Math.min(Math.max(1, Math.min(30, foeL)), R + 3) * 75 / 100);
+const questXp = (cl, R) => Math.floor((100 + 40 * Math.min(Math.max(1, Math.min(30, cl)), R + 3)) * 75 / 100);
+
+const HOLS = [
+  {n:'Merchants Festival', d:190, what:'Everything half price outside the guilds'},
+  {n:'Tales and Tallow', d:243, what:'Half-price buying inside the Mages Guild'},
+  {n:'Witches Festival', d:283, what:'Identifying costs nothing'},
+  {n:'Warriors Festival', d:320, what:'Weapons half price outside the guilds'},
+  {n:'First Harvest', d:67, what:'Temples cure disease free'},
+  {n:'Second Harvest', d:127, what:'Temples cure disease free'},
+  {n:'South Winds Prayer', d:15, what:'Temples cure disease free'},
+  {n:'North Winds Festival', d:345, what:'Cures at half price'}
+];
+const MONTHS = ['Morning Star','Sun’s Dawn','First Seed','Rain’s Hand','Second Seed','Midyear','Sun’s Height','Last Seed','Hearthfire','Frostfall','Sun’s Dusk','Evening Star'];
+const DAYS = ['Sundas','Morndas','Tirdas','Middas','Turdas','Fredas','Loredas'];
+const PHASES = ['New','Waxing crescent','Half, waxing','Waxing gibbous','Full','Waning gibbous','Half, waning','Waning crescent'];
+const EPOCH_MS = Date.UTC(2026, 8, 14, 0, 0, 0), EPOCH_MIN = 523530, YEAR_MIN = 518400;
+const gameMin = (ms) => EPOCH_MIN + (ms - EPOCH_MS) * 12 / 60000;
+const wallMs = (gm) => EPOCH_MS + (gm - EPOCH_MIN) * 60000 / 12;
+
+const LADDERS = [
+  {id:'counter', icon:'coin', name:'Shops'},
+  {id:'descent', icon:'door', name:'Dungeons'},
+  {id:'forge', icon:'anvil', name:'Metals'},
+  {id:'harvest', icon:'gem', name:'Loot'},
+  {id:'doors', icon:'key', name:'Guilds'},
+  {id:'binding', icon:'rune', name:'Enchanting'},
+  {id:'kindling', icon:'flame', name:'Level'},
+  {id:'wheel', icon:'moon', name:'Calendar'},
+  {id:'test', icon:'question', name:'Quiz'}
+];
+
+const OMENS = [
+  'Shelves count your Luck in whole tens. At 69 you shop like 60.',
+  'Buy plain goods in a junk shop. Sell your loot in an incense shop.',
+  'Silver bites every ghost, wraith and vampire at full strength.',
+  'A knight’s Seneschal hands out mithril plate at rank 5.',
+  'One Daedra Lord’s soul pays for 8,000 points of enchantment.',
+  'In a group, let the highest Renown host the dungeon.',
+  'Fists and spells ignore a foe’s metal.',
+  'Every 25 pieces without a Legendary raise the odds by a fifth.',
+  'Pawn shops are the only counters that roll magic items.',
+  'A lower character level carries more gold off every corpse.',
+  'Covens have the best metal drops, plus four kinds of daedra.',
+  'The Merchants Festival halves every price outside the guilds.',
+  'Stendarr at rank 9 ignores almost one death in five.',
+  'Rare drops come unidentified, and their lines already work.',
+  'The Thieves Guild never expels you.',
+  'From character level 19 almost nothing weak spawns.',
+  'A daedric tower shield holds 4,500 points of enchantment.',
+  'The highest-Renown member of a party should host.'
+];
+
+// ── ogham ───────────────────────────────────────────────────────
+const OG = {beith:['R',1],luis:['R',2],fearn:['R',3],sail:['R',4],nion:['R',5],uath:['L',1],dair:['L',2],tinne:['L',3],coll:['L',4],ceirt:['L',5],muin:['D',1],gort:['D',2],ngetal:['D',3],straif:['D',4],ruis:['D',5],ailm:['X',1],onn:['X',2],ur:['X',3],eadhadh:['X',4],iodhadh:['X',5]};
+function ogham(name){
+  const [k, n] = OG[name], H = 44, cx = 14, gap = 6, y0 = H / 2 - (n - 1) * gap / 2;
+  let s = '<line x1="' + cx + '" y1="3" x2="' + cx + '" y2="' + (H - 3) + '"/>';
+  for (let i = 0; i < n; i++) {
+    const y = y0 + i * gap;
+    if (k === 'R') s += '<line x1="' + cx + '" y1="' + y + '" x2="' + (cx + 10) + '" y2="' + y + '"/>';
+    else if (k === 'L') s += '<line x1="' + (cx - 10) + '" y1="' + y + '" x2="' + cx + '" y2="' + y + '"/>';
+    else if (k === 'D') s += '<line x1="' + (cx - 9) + '" y1="' + (y + 3) + '" x2="' + (cx + 9) + '" y2="' + (y - 3) + '"/>';
+    else s += '<line x1="' + (cx - 5) + '" y1="' + y + '" x2="' + (cx + 5) + '" y2="' + y + '"/>';
+  }
+  return '<svg class="og" viewBox="0 0 28 44" aria-hidden="true">' + s + '</svg>';
+}
+
+// ── state ───────────────────────────────────────────────────────
+const KEY = 'hidden-ladders-gen2';
+const DEF = {luck:50, level:12, renown:15, veil:false, shop:0, seek:'metal', fam:'', dun:7, metal:2, src:'wraith', drought:0, recent:[], tally:{common:0, magic:0, rare:0, legendary:0}, rank:5, item:'Amulet', emetal:9, bind:['s-lord','p-regen','p-mag-daedra','p-rep-all'], party:1, seeds:{}, best:0, marks:{}};
+let S = JSON.parse(JSON.stringify(DEF));
+function load(){ try { const raw = localStorage.getItem(KEY); return raw ? JSON.parse(raw) : null; } catch (e) { return null; } }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+function adopt(o){
+  if (!o || typeof o !== 'object') return;
+  for (const k of Object.keys(DEF)) if (o[k] !== undefined && typeof o[k] === typeof DEF[k]) S[k] = o[k];
+  const cl = (v, lo, hi, d) => Number.isFinite(v) ? Math.max(lo, Math.min(hi, Math.round(v))) : d;
+  S.luck = cl(S.luck, 1, 100, 50); S.level = cl(S.level, 1, 30, 12); S.renown = cl(S.renown, 1, 50, 15);
+  S.shop = cl(S.shop, 0, 4, 0); S.metal = cl(S.metal, 0, 9, 2); S.rank = cl(S.rank, 1, 9, 5); S.emetal = cl(S.emetal, 0, 9, 9); S.party = cl(S.party, 1, 8, 1);
+  S.drought = cl(S.drought, 0, 100000, 0);
+  if (!DUN.some(r => r[0] === S.dun)) S.dun = 7;
+  if (!SOURCES.some(s => s.id === S.src)) S.src = 'wraith';
+  if (!['metal','magic','daedra'].includes(S.seek)) S.seek = 'metal';
+  if (S.fam && !FAMS[S.fam]) S.fam = '';
+  if (!ITEMS.some(i => i[0] === S.item)) S.item = 'Amulet';
+  if (!Array.isArray(S.bind)) S.bind = DEF.bind.slice();
+  S.bind = S.bind.filter(id => BIND_ALL[id]).slice(0, 10);
+  if (!Array.isArray(S.recent)) S.recent = [];
+  S.recent = S.recent.filter(x => typeof x === 'string').slice(-40);
+}
+let streak = 0, current = null;
+
+// ── helpers ─────────────────────────────────────────────────────
+const $ = (s) => document.querySelector(s);
+const fmt = (n) => Math.round(n).toLocaleString('en-US');
+const pc = (x, d) => { const v = x; if (v > 0 && v < 0.1) return '<0.1%'; return v.toFixed(d == null ? (v < 10 && v % 1 ? 1 : 0) : d) + '%'; };
+const lm = () => Math.min(10, Math.floor(S.luck / 10));
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+const pick = (a) => a[Math.floor(Math.random() * a.length)];
+const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const ord = (n) => n + (n % 100 >= 11 && n % 100 <= 13 ? 'th' : ({1:'st',2:'nd',3:'rd'})[n % 10] || 'th');
+const sum = (a) => a.reduce((x, y) => x + y, 0);
+
+let toastT = 0;
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600); }
+
+function plant(id){
+  if (S.seeds[id]) return;
+  S.seeds[id] = 1; save();
+  const n = LADDERS.filter(l => S.seeds[l.id]).length;
+  const l = LADDERS.find(x => x.id === id);
+  toast(n === LADDERS.length ? 'Every section explored. Go teach a guildmate something.' : 'Explored: ' + l.name + '. ' + n + ' of ' + LADDERS.length + '.');
+  renderGrove();
+}
+
+// ── sigil & grove ───────────────────────────────────────────────
+function luckWord(l){
+  if (l < 20) return 'Very low. Shops and loot are stingy.';
+  if (l < 40) return 'Low. Shops are a bit stingy.';
+  if (l < 60) return 'Average.';
+  if (l < 80) return 'Good. Better shelves and loot.';
+  if (l < 100) return 'Great. Close to the best odds.';
+  return 'Maxed out.';
+}
+function renderSigil(){
+  $('#sig-luck').value = S.luck; $('#sig-level').value = S.level; $('#sig-renown').value = S.renown;
+  $('#o-luck').textContent = S.luck; $('#o-level').textContent = S.level; $('#o-renown').textContent = S.renown;
+  $('#luckmini').textContent = S.luck;
+  const next = (lm() + 1) * 10;
+  $('#r-luck').textContent = luckWord(S.luck) + (S.luck < 100 ? ' Shops count it as ' + (lm() * 10) + '; the next step is ' + next + '.' : '');
+  const L = S.level;
+  $('#r-level').textContent = L >= 19 ? 'The strongest foes spawn; almost nothing weak is left.' : L >= 16 ? 'The strongest foe types show up regularly now.' : 'Most foes come from slots ' + Math.max(0, L - 3) + ' to ' + Math.min(19, L + 3) + ' of each 20-slot spawn table.';
+  const st = STAGES.find(s => S.renown >= s.lo && S.renown <= s.hi);
+  $('#r-renown').textContent = 'Stage: ' + st.name + '. +' + (3 * (S.renown - 1)) + ' health and +' + (2 * (S.renown - 1)) + ' magicka online.';
+}
+function renderGrove(){
+  $('#seeds').innerHTML = LADDERS.map(l => '<a class="seed' + (S.seeds[l.id] ? ' lit' : '') + '" href="#' + l.id + '" aria-label="' + esc(l.name) + (S.seeds[l.id] ? ', explored' : ', not explored yet') + '" title="' + esc(l.name) + '"><canvas data-icon="' + l.icon + '" width="9" height="9"></canvas></a>').join('');
+  paintIcons($('#seeds'));
+  document.querySelectorAll('#stavenav a').forEach(a => a.classList.toggle('lit', !!S.seeds[a.dataset.id]));
+  const n = LADDERS.filter(l => S.seeds[l.id]).length;
+  $('#grove-read').textContent = n === 0 ? 'Use any tool below to light up its icon.'
+    : n < LADDERS.length ? n + ' of ' + LADDERS.length + ' explored.'
+    : 'All 9 explored. Share one thing you learned with the guild.';
+}
+function renderOmen(){
+  const day = Math.floor(Date.now() / 86400000);
+  $('#omen').textContent = OMENS[day % OMENS.length];
+}
+
+// ── the counter ─────────────────────────────────────────────────
+function spectrum(dist){
+  const parts = dist.map((p, i) => p > 0 ? '<span style="width:' + p + '%;background:var(--m' + i + ')" title="' + MET[i] + ' ' + p + '%"></span>' : '').join('');
+  const legend = dist.map((p, i) => [p, i]).filter(([p]) => p >= 0.1).map(([p, i]) => '<span><i class="dot" style="background:var(--m' + i + ')"></i>' + MET[i] + ' <b class="num">' + pc(p) + '</b></span>').join('');
+  return '<div class="spectrum" role="img" aria-label="Metal odds">' + parts + '</div><div class="legend">' + legend + '</div>';
+}
+function renderCounter(){
+  $('#rungs').innerHTML = SHOPS.map((s, i) => '<button type="button" class="rung" data-act="shop" data-i="' + i + '" aria-pressed="' + (S.shop === i) + '"><span class="glyph" aria-hidden="true">' + s.glyph + '</span><span><span class="quote">“' + esc(s.line) + '…”</span><span class="nick"><span>' + s.metal + ' &middot; ' + s.nick + '</span><span>' + s.q + '</span></span></span></button>').join('');
+  const s = SHOPS[S.shop], row = SH.shop[lm()][S.shop], w = row.slice(0, 10), plate = row[10];
+  const mith = sum(w.slice(5));
+  const v = Math.max(1, Number($('#worth') ? $('#worth').value : 1000) || 1000);
+  $('#shopread').innerHTML =
+    '<h3>Tier ' + s.glyph + ': ' + s.metal + ' (' + s.nick + ')</h3>' +
+    '<p class="verdict">' + s.verdict + '</p>' +
+    '<div><span class="label">Weapons on the shelf at Luck ' + S.luck + '</span>' + spectrum(w) + '</div>' +
+    '<dl class="kv"><dt>Mithril or better</dt><dd class="num">' + (mith > 0 ? pc(mith) : 'never') + '</dd><dt>Armour that’s plate</dt><dd class="num">' + pc(plate) + '</dd></dl>' +
+    '<div class="worth"><label class="label" for="worth">An item worth</label><input id="worth" type="number" min="1" step="50" inputmode="numeric" value="' + v + '"><span class="label">gold</span></div>' +
+    '<div class="price" id="price"></div><p class="vstat">Ranges run from a sharp haggler to a dull one. Each region drifts between 75% and 125% of these, day to day.</p>';
+  renderPrice();
+}
+function renderPrice(){
+  const s = SHOPS[S.shop], v = Math.max(1, Number($('#worth').value) || 1000), k = v / 1000;
+  $('#price').innerHTML = '<div><span class="label">You pay</span><div class="v num">' + fmt(s.buy[0] * k) + '–' + fmt(s.buy[1] * k) + '</div></div><div><span class="label">They pay you</span><div class="v num">' + fmt(s.sell[0] * k) + '–' + fmt(s.sell[1] * k) + '</div></div>';
+}
+
+// ── the descent ─────────────────────────────────────────────────
+const metalRank = (r) => r[2] < 0 ? Math.min(S.level, 15) : r[2];
+const dunDist = (r) => r[2] < 0 ? SH.star[lm()][Math.min(S.level, 15) - 1] : SH.dun[lm()][r[0]];
+function renderDescent(){
+  const seeks = [['metal','Rare metal'],['magic','Magic & Legendaries'],['daedra','Daedra']];
+  $('#seek').innerHTML = seeks.map(([k, t]) => '<button type="button" class="chip" data-act="seek" data-k="' + k + '" aria-pressed="' + (S.seek === k) + '">' + t + '</button>').join('');
+  $('#famchips').innerHTML = '<span class="label" style="align-self:center">Legendary family</span>' + ['', ...FAM_KEYS].map(f => '<button type="button" class="chip" data-act="fam" data-k="' + f + '" aria-pressed="' + (S.fam === f) + '">' + (f || 'Any') + '</button>').join('');
+  const key = S.seek === 'metal' ? (r) => metalRank(r) * 100 + r[3] : S.seek === 'magic' ? (r) => r[3] * 100 + metalRank(r) : (r) => r[4] * 1000 + metalRank(r);
+  const rows = DUN.slice().sort((a, b) => key(b) - key(a));
+  const pips = (n) => '<span class="pips" aria-label="' + n + ' of 8 top slots are daedra">' + Array.from({length:8}, (_, i) => '<i class="' + (i < n ? 'on' : '') + '"></i>').join('') + '</span>';
+  let html = '<div class="dhead label"><span>Dungeon type</span><span>Metal</span><span>Magic</span><span>Daedra</span></div>';
+  for (const r of rows) {
+    const open = r[0] === S.dun, dim = S.fam && r[5] !== S.fam;
+    const mr = metalRank(r);
+    html += '<button type="button" class="drow' + (dim ? ' dim' : '') + '" data-act="dun" data-d="' + r[0] + '" aria-expanded="' + open + '">' +
+      '<span class="dn"><b>' + r[1] + '</b>' + (r[5] ? '<span class="fam' + (S.fam === r[5] ? ' on' : '') + '">' + r[5] + '</span>' : '') + '</span>' +
+      '<span class="mcell"><span class="meter"><i style="width:' + (mr / 21 * 100) + '%;--c:var(--m5)"></i></span><small>metal rank ' + mr + (r[2] < 0 ? ' (your level)' : '') + '</small></span>' +
+      '<span class="mcell"><span class="meter"><i style="width:' + (r[3] / 18 * 100) + '%;--c:var(--r1)"></i></span><small>magic tier ' + r[3] + '</small></span>' +
+      pips(r[4]) + '</button>';
+    if (open) html += dunDetail(r);
+  }
+  $('#dlist').innerHTML = html;
+  renderCarry();
+}
+function dunDetail(r){
+  const dist = dunDist(r), mith = sum(dist.slice(5));
+  const c = chances({kind:'pile', tier:r[3]}, S.luck, 1);
+  const bring = WANTS.slice().reverse().map(w => [w, r[6].filter(f => w.foes.includes(f))]).filter(([, f]) => f.length);
+  const bringTxt = bring.length ? bring.map(([w, f]) => '<b>' + w.label + ' or better</b> for ' + f.join(', ')).join('; ') : 'anything. No foe here needs a special metal.';
+  const fam = r[5] ? '<p class="vstat">Legendaries here are five times likelier to be from the <b>' + r[5] + '</b> family: ' + FAMS[r[5]].join(', ') + '.</p>' : '<p class="vstat">No family bonus: any Legendary can drop here.</p>';
+  return '<div class="ddetail">' +
+    '<p class="vstat"><b>Strongest foes here</b> (common from level 15): ' + r[6].join(', ') + '.</p>' +
+    '<p class="vstat"><b>Bring</b> ' + bringTxt + '</p>' +
+    '<div><span class="label">Metal drops at Luck ' + S.luck + (r[2] < 0 ? ', level ' + S.level : '') + ' &middot; mithril or better ' + (mith > 0 ? pc(mith) : 'never') + '</span>' + spectrum(dist) + '</div>' +
+    '<p class="vstat"><b>A treasure pile here</b> at your Luck: Magic or better <b class="num">' + pc(c.magic / 10) + '</b>, Rare or better <b class="num">' + pc(c.rare / 10) + '</b>, Legendary <b class="num">' + pc(c.legendary / 10, 1) + '</b>.</p>' +
+    fam + '</div>';
+}
+function renderCarry(){
+  const L = lm();
+  const p = (T) => Math.max(0, Math.min(101, 95 - T + L)) / 101 * 100;
+  const rows = [['Daedra Lord','daedric piece',70],['Daedra Seducer','daedric weapon',75],['Fire or Frost Daedra, Daedroth','daedric piece',80],['Orc Warlord','orcish piece',80],['Orc Shaman','orcish piece',90],['Orc Sergeant','orcish piece',95],['Orc','orcish piece',98]];
+  $('#carry').innerHTML = '<thead><tr><th>Foe</th><th>Carries</th><th class="r">Chance</th></tr></thead><tbody>' + rows.map(([f, what, T]) => '<tr><td>' + f + '</td><td>' + what + '</td><td class="r num">' + pc(p(T)) + '</td></tr>').join('') + '</tbody>';
+  const hi = Math.max(1, L);
+  $('#goldline').innerHTML = 'Gold on corpses is divided by your character level (' + S.level + '), then multiplied by a roll of <b>1 to ' + hi + '</b> (your Luck in tens). ' + (hi < 6 ? 'Luck 60 makes that 1 to 6.' : 'High Luck pays off here too.');
+}
+
+// ── the forge ───────────────────────────────────────────────────
+function renderForge(){
+  $('#metals').innerHTML = MET.map((m, i) => '<button type="button" class="metal" data-act="metal" data-i="' + i + '" aria-pressed="' + (S.metal === i) + '" title="' + m + '"><i style="background:var(--m' + i + ')"></i>' + MET_LABEL[i] + '</button>').join('');
+  const i = S.metal;
+  $('#metalread').innerHTML = '<h3>' + MET[i] + '</h3><p class="verdict">' + MET_WORD[i] + '</p>' +
+    '<dl class="kv"><dt>Weapon bonus</dt><dd class="num">' + (MET_BONUS[i] > 0 ? '+' : MET_BONUS[i] < 0 ? '−' : '') + Math.abs(MET_BONUS[i]) + ' to every hit</dd><dt>As plate armour</dt><dd class="num">' + MET_PLATE[i] + '</dd><dt>Enchantment room</dt><dd class="num">×' + MET_ROOM[i] + '</dd><dt>Tier</dt><dd class="num">' + (i + 1) + ' of 10</dd></dl>';
+  $('#bite').innerHTML = '<span class="label">Damage against foes that need a metal</span>' + WANTS.map(w => {
+    const b = biteOf(i, w.need);
+    return '<div class="biterow"><span>Needs ' + w.label + '</span><span class="meter"><i style="width:' + b + '%;--c:' + (b === 100 ? 'var(--verd)' : b > 40 ? 'var(--gilt)' : 'var(--rube)') + '"></i></span><span class="pc num">' + b + '%</span><span class="who">' + w.foes.join(', ') + '</span></div>';
+  }).join('');
+}
+
+// ── the harvest ─────────────────────────────────────────────────
+function renderRarities(){
+  $('#rarities').innerHTML = RARITY.map((r, i) => '<span class="rar' + (i > 3 ? ' out' : '') + '" style="--c:var(' + r.c + ')" title="' + esc(r.word) + '">' + r.label + '</span>').join('');
+}
+function renderHarvest(){
+  $('#sources').innerHTML = SOURCES.map(s => '<button type="button" class="chip" data-act="src" data-k="' + s.id + '" aria-pressed="' + (S.src === s.id) + '">' + s.name + '<span> &middot; tier ' + s.tier + '</span></button>').join('');
+  const src = SOURCES.find(s => s.id === S.src), f = droughtMult(S.drought), c = chances(src, S.luck, f);
+  const row = (lab, v, col, d) => '<div class="oddrow"><span>' + lab + '</span><span class="meter"><i style="width:' + Math.min(100, v / 6) + '%;--c:var(' + col + ')"></i></span><span class="pc num">' + pc(v / 10, d) + '</span></div>';
+  $('#odds').innerHTML = '<span class="label">Each piece it drops, at Luck ' + S.luck + '</span>' + row('Magic or better', c.magic, '--r1') + row('Rare or better', c.rare, '--r2') + row('Legendary', c.legendary, '--r3', 1) + (src.note ? '<p class="vstat">' + src.note + '</p>' : '') + (c.magic >= 600 ? '<p class="vstat">This is the maximum. More Luck won’t raise it.</p>' : '');
+  const toNext = 25 - (S.drought % 25);
+  $('#drought').innerHTML = '<span class="label">Bad-luck protection</span><p class="vstat">Pieces since your last Legendary: <b class="num">' + S.drought + '</b>. Legendary odds <b class="num">×' + f.toFixed(1) + '</b>' + (f < 3 ? ', next boost in ' + toNext + ' pieces.' : ', the maximum.') + '</p>';
+  $('#fams').innerHTML = FAM_KEYS.map(k => '<div class="' + (src.fam === k ? 'on' : '') + '"><b>' + k + '</b><span>' + FAMS[k].join(', ') + '</span></div>').join('');
+  renderCup();
+}
+function renderCup(){
+  const col = {common:'--r0', magic:'--r1', rare:'--r2', legendary:'--r3'};
+  $('#cup').innerHTML = S.recent.map((r, i) => '<i class="' + (i >= S.recent.length - (renderCup.fresh || 0) ? 'new' : '') + '" style="--c:var(' + col[r] + ')" title="' + r + '"></i>').join('');
+  renderCup.fresh = 0;
+  const t = S.tally, n = t.common + t.magic + t.rare + t.legendary;
+  $('#tally').innerHTML = n ? 'Rolled so far: <b class="num">' + n + '</b> &middot; Magic ' + t.magic + ' &middot; Rare ' + t.rare + ' &middot; Legendary ' + t.legendary + '. Real odds, practice rolls.' : 'These use the game’s real odds. Roll a few to see how often each rarity comes up.';
+}
+function legendName(fam){
+  const pool = [];
+  for (const k of FAM_KEYS) for (const n of FAMS[k]) pool.push([n, k === fam ? 5 : 1, k]);
+  let r = Math.random() * sum(pool.map(p => p[1]));
+  for (const p of pool) { r -= p[1]; if (r <= 0) return p; }
+  return pool[0];
+}
+function cast(n){
+  const src = SOURCES.find(s => s.id === S.src);
+  let last = null, legs = [];
+  for (let k = 0; k < n; k++) {
+    const c = chances(src, S.luck, droughtMult(S.drought)), r = Math.random() * 1000;
+    const tier = r < c.legendary ? 'legendary' : r < c.rare ? 'rare' : r < c.magic ? 'magic' : 'common';
+    S.tally[tier]++; S.recent.push(tier); last = tier;
+    if (tier === 'legendary') { legs.push(legendName(src.fam)); S.drought = 0; } else S.drought++;
+  }
+  S.recent = S.recent.slice(-40); renderCup.fresh = Math.min(n, 40);
+  let msg;
+  if (legs.length) { const [name, , fam] = legs[legs.length - 1]; msg = 'Legendary! ' + name + ' (' + fam + ' family).'; }
+  else if (n > 1) msg = 'No Legendary in that batch. Every miss raises your odds a little.';
+  else msg = {common:'Common.', magic:'Magic: one or two bonus lines.', rare:'Rare: three or four bonus lines.'}[last];
+  $('#lastroll').textContent = msg;
+  save(); plant('harvest'); renderHarvest();
+}
+
+// ── the doors ───────────────────────────────────────────────────
+function renderDoors(){
+  const N = S.rank;
+  $('#rankbig').textContent = N;
+  $('#rankdots').innerHTML = Array.from({length:9}, (_, i) => '<button type="button" data-act="rankset" data-n="' + (i + 1) + '" aria-pressed="' + (N === i + 1) + '" aria-label="Rank ' + (i + 1) + '">' + (i + 1) + '</button>').join('');
+  $('#keys').innerHTML =
+    '<div><span class="label">Reputation</span><span class="v num">' + (10 * N) + '</span><small>with the guild</small></div>' +
+    '<div><span class="label">One skill at</span><span class="v num">' + (15 + 8 * N) + '</span><small>a guild skill</small></div>' +
+    '<div><span class="label">Another at</span><span class="v num">' + (1 + 4 * N) + '</span><small>a second guild skill</small></div>' +
+    '<div><span class="label">Wait</span><span class="v num">28</span><small>game days since your last rank (about 56 real hours)</small></div>';
+  $('#titles').innerHTML = 'Rank ' + N + ' titles: ' + Object.entries(GUILD_TITLES).map(([g, t]) => '<b>' + t[N] + '</b> (' + g + ')').join(', ') + '. A knight’s Seneschal offers <b>' + MET[N].toLowerCase() + ' plate</b>.';
+  const now = OPENS.filter(o => o.r === N), before = OPENS.filter(o => o.r < N);
+  const group = (list) => { const m = new Map(); list.forEach(o => { if (!m.has(o.who)) m.set(o.who, []); m.get(o.who).push(o.what); }); return [...m].map(([w, l]) => '<div class="open"><b>' + w + '</b><span>' + l.join(', ') + '</span></div>').join(''); };
+  $('#opens').innerHTML = '<span class="label">Opens at rank ' + N + '</span>' + (now.length ? group(now) : '<p class="vstat">Nothing new opens at this rank.</p>') +
+    (before.length ? '<details class="earlier"><summary>Already open by rank ' + N + ' (' + before.length + ')</summary><div class="opens">' + group(before) + '</div></details>' : '');
+}
+
+// ── the binding ─────────────────────────────────────────────────
+function initBinding(){
+  $('#ench-item').innerHTML = ITEMS.map(([n, r]) => '<option value="' + esc(n) + '">' + n + ' (' + fmt(r) + ')</option>').join('');
+  $('#ench-metal').innerHTML = MET.map((m, i) => '<option value="' + i + '">' + m + ' ×' + MET_ROOM[i] + '</option>').join('');
+}
+function renderBinding(){
+  const it = ITEMS.find(i => i[0] === S.item) || ITEMS[0];
+  $('#ench-item').value = it[0];
+  const ms = $('#ench-metal'); ms.value = String(S.emetal); ms.disabled = !it[2];
+  const room = Math.round(it[1] * (it[2] ? MET_ROOM[S.emetal] : 1));
+  const take = sum(S.bind.filter(id => BIND_ALL[id].kind === 'take').map(id => BIND_ALL[id].c));
+  const give = sum(S.bind.filter(id => BIND_ALL[id].kind === 'give').map(id => BIND_ALL[id].c));
+  const cap = room + give, over = take - cap, lines = S.bind.length;
+  const scale = Math.max(cap, take, 1);
+  const fill = $('#fill');
+  fill.classList.toggle('over', over > 0);
+  fill.querySelector('.room').style.width = (cap / scale * 100) + '%';
+  fill.querySelector('.spend').style.width = (take / scale * 100) + '%';
+  $('#vstat').innerHTML = 'Room <b class="num">' + fmt(room) + '</b>' + (give ? ' + added <b class="num">' + fmt(give) + '</b>' : '') + ' &middot; powers use <b class="num">' + fmt(take) + '</b> &middot; lines <b class="num">' + lines + '/10</b><br>' +
+    (over > 0 ? '<span style="color:var(--rube)">Over by ' + fmt(over) + '. Add a side effect or a soul, or remove a power.</span>' : take === 0 ? 'Nothing added yet. Pick a power.' : '<span style="color:var(--verd)">It fits, with ' + fmt(-over) + ' to spare.</span> Costs ' + fmt(take * 10) + ' gold.') +
+    (!it[2] ? ' Jewellery and clothes ignore metal.' : '');
+  const chip = ([id, n, c]) => { const on = S.bind.includes(id), k = BIND_ALL[id].kind; return '<button type="button" class="chip bchip ' + k + '" data-act="bind" data-k="' + id + '" aria-pressed="' + on + '"' + (!on && lines >= 10 ? ' disabled' : '') + '>' + n + ' <span class="cost num">' + fmt(c) + '</span></button>'; };
+  $('#b-powers').innerHTML = POWERS.map(chip).join('');
+  $('#b-draw').innerHTML = DRAWS.map(chip).join('');
+  $('#b-souls').innerHTML = SOULS.map(chip).join('');
+}
+
+// ── the kindling ────────────────────────────────────────────────
+function bands(L){
+  const fix = (a, b) => { if (a < 0) { a = 0; b = 5; } if (b > 19) { a = 14; b = 19; } return [a, b]; };
+  return [fix(L - 3, L + 3), fix(0, L + 1), L <= 5 ? fix(0, L + 2) : [0, 19]];
+}
+function renderKindling(){
+  const L = S.level, B = bands(L);
+  const labels = ['4 in 5', '3 in 20', '1 in 20'], cls = ['on', 'on2', 'on3'];
+  let h = '';
+  B.forEach(([a, b], k) => { h += '<span class="rl">' + labels[k] + '</span>'; for (let i = 0; i < 20; i++) h += '<i class="' + (i >= a && i <= b ? cls[k] : '') + '" title="slot ' + i + '"></i>'; });
+  h += '<span class="rl">weak → strong</span>'; for (let i = 0; i < 20; i++) h += '<span class="ax">' + (i % 5 === 0 || i === 19 ? i : '') + '</span>';
+  $('#slots').innerHTML = h;
+  $('#slotline').innerHTML = 'At character level <b>' + L + '</b>, four foes in five come from slots <b>' + B[0][0] + '–' + B[0][1] + '</b> of each spawn table. ' + (L >= 19 ? 'Even the rare spawns stay strong now.' : L >= 16 ? 'Daedra Lords and Ancient Liches show up regularly.' : 'The strongest foes start showing up regularly at level 16.');
+  const R = S.renown, st = STAGES.find(s => R >= s.lo && R <= s.hi);
+  $('#stages').innerHTML = STAGES.map(s => '<div class="stage' + (s === st ? ' on' : '') + '"><b>' + s.name + '</b><small>' + s.lo + '–' + s.hi + '</small></div>').join('');
+  const span = R < 50 ? xpFor(R + 1) - xpFor(R) : 0;
+  const mult = 1 + 0.1 * (S.party - 1);
+  const kx = Math.round(killXp(R + 3, R) * mult), qx = questXp(S.level, R);
+  $('#renownkv').innerHTML = R < 50 ?
+    '<dt>Renown ' + R + ' to ' + (R + 1) + '</dt><dd class="num">' + fmt(span) + ' XP</dd>' +
+    '<dt>A quest pays</dt><dd class="num">' + fmt(qx) + ' &middot; about ' + fmt(Math.ceil(span / qx)) + ' quests</dd>' +
+    '<dt>The best kill pays</dt><dd class="num">' + fmt(kx) + ' (a foe of level ' + Math.min(30, R + 3) + ' or more) &middot; about ' + fmt(Math.ceil(span / kx)) + ' kills</dd>' +
+    '<dt>Fastest possible</dt><dd class="num">' + (span / 15000 < 1 ? 'under an hour' : (span / 15000).toFixed(1) + ' real hours') + ' at the cap</dd>' +
+    '<dt>' + st.name + ' stage loot</dt><dd>keeps ' + st.kept + '% of plain loot; ' + st.heal + '% of foes carry a healing potion, ' + st.rp + '% Restore Power</dd>'
+    : '<dt>Renown 50</dt><dd>The top. +147 health and +98 magicka.</dd>';
+  $('#party').innerHTML = Array.from({length:8}, (_, i) => '<button type="button" class="chip" data-act="party" data-n="' + (i + 1) + '" aria-pressed="' + (S.party === i + 1) + '">' + (i + 1) + '</button>').join('');
+  $('#renownverdict').textContent = S.party > 1 ? 'A party of ' + S.party + ' adds ' + (10 * (S.party - 1)) + '% Renown to every kill.' : 'Solo kills pay the base amount. Each extra party member in the room adds 10%.';
+}
+
+// ── the wheel ───────────────────────────────────────────────────
+function moonPath(cx, cy, r, ring){
+  const p = ((ring % 8) + 8) % 8 / 8;
+  if (p < 0.01 || p > 0.99) return '';
+  if (Math.abs(p - 0.5) < 0.01) return 'M' + cx + ' ' + (cy - r) + 'A' + r + ' ' + r + ' 0 1 1 ' + cx + ' ' + (cy + r) + 'A' + r + ' ' + r + ' 0 1 1 ' + cx + ' ' + (cy - r) + 'Z';
+  const wax = p < 0.5, rx = Math.abs(Math.cos(2 * Math.PI * p)) * r;
+  const outer = wax ? 1 : 0, term = wax ? (p < 0.25 ? 0 : 1) : (p > 0.75 ? 1 : 0);
+  return 'M' + cx + ' ' + (cy - r) + 'A' + r + ' ' + r + ' 0 0 ' + outer + ' ' + cx + ' ' + (cy + r) + 'A' + rx.toFixed(2) + ' ' + r + ' 0 0 ' + term + ' ' + cx + ' ' + (cy - r) + 'Z';
+}
+function phaseName(ratio){
+  if (ratio === 0) return 'Full';
+  if (ratio === 16) return 'New';
+  if (ratio <= 5) return 'Waning gibbous';
+  if (ratio <= 10) return 'Half, waning';
+  if (ratio <= 15) return 'Waning crescent';
+  if (ratio <= 22) return 'Waxing crescent';
+  if (ratio <= 28) return 'Half, waxing';
+  return 'Waxing gibbous';
+}
+function gdate(gm){
+  const y = Math.floor(gm / YEAR_MIN), yearStart = y * YEAR_MIN, rem = gm - yearStart;
+  const month = Math.floor(rem / 43200), day = Math.floor((rem - month * 43200) / 1440), mod = rem - month * 43200 - day * 1440;
+  return {year:404 + y, yearStart, month, day, mod, doy: month * 30 + day + 1};
+}
+function countdown(ms){
+  const s = Math.max(0, Math.floor(ms / 1000)), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), sec = s % 60;
+  if (d) return d + 'd ' + h + 'h';
+  if (h) return h + 'h ' + String(m).padStart(2, '0') + 'm';
+  return m + 'm ' + String(sec).padStart(2, '0') + 's';
+}
+let lastMoonKey = '';
+function renderWheel(){
+  const now = Date.now(), gm = gameMin(now), g = gdate(gm);
+  const hh = Math.floor(g.mod / 60), mm = Math.floor(g.mod % 60);
+  const daypart = hh < 5 ? 'Night.' : hh < 7 ? 'Dawn.' : hh < 12 ? 'Morning.' : hh < 17 ? 'Afternoon.' : hh < 19 ? 'Dusk.' : 'Night.';
+  $('#today').innerHTML = DAYS[g.day % 7] + ', the ' + ord(g.day + 1) + ' of ' + MONTHS[g.month] + ', 3E ' + g.year + '<small>' + String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0') + ' &middot; ' + daypart + ' Day ' + g.doy + ' of 360.</small>';
+  const moonKey = g.doy + ':' + Math.floor(g.mod / 30);
+  if (moonKey !== lastMoonKey) {
+    lastMoonKey = moonKey;
+    const moon = (name, off, r, col) => {
+      const base = g.doy + g.year * 360 + off, ratioI = base % 32, ratio = ratioI + g.mod / 1440, ring = (4 + ratio / 4) % 8;
+      const S2 = r * 2 + 4, c = r + 2;
+      return '<div class="moon"><svg width="' + S2 + '" height="' + S2 + '" viewBox="0 0 ' + S2 + ' ' + S2 + '" role="img" aria-label="' + name + ': ' + phaseName(ratioI) + '"><circle cx="' + c + '" cy="' + c + '" r="' + r + '" fill="var(--bg-sunk)" stroke="var(--line-2)"/><path d="' + moonPath(c, c, r, ring) + '" fill="var(' + col + ')"/></svg><span><b style="color:var(--ink)">' + name + '</b><br>' + phaseName(ratioI) + '</span></div>';
+    };
+    $('#moons').innerHTML = moon('Masser', 3, 24, '--masser') + moon('Secunda', -1, 15, '--secunda');
+  }
+  const rows = HOLS.map(h => {
+    let s = g.yearStart + (h.d - 1) * 1440;
+    if (gm >= s + 1440) s += YEAR_MIN;
+    const active = gm >= s && gm < s + 1440;
+    const startMs = wallMs(s), endMs = wallMs(s + 1440);
+    const hm = ord(((h.d - 1) % 30) + 1) + ' of ' + MONTHS[Math.floor((h.d - 1) / 30)];
+    return {h, active, startMs, endMs, hm};
+  }).sort((a, b) => (a.active ? -1 : 0) - (b.active ? -1 : 0) || a.startMs - b.startMs);
+  const opt = {weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit'};
+  $('#hols').innerHTML = rows.map(({h, active, startMs, endMs, hm}) => {
+    const marked = !!S.marks[h.n];
+    return '<div class="hol' + (active ? ' now' : '') + (marked ? ' marked' : '') + '"><span class="hn"><b>' + h.n + '</b><small>' + hm + '</small></span><span class="hw">' + h.what + '</span><span class="ht">' + new Date(startMs).toLocaleString(undefined, opt) + '</span><span style="display:flex;gap:8px;align-items:center;justify-content:end"><span class="cd" data-start="' + startMs + '" data-end="' + endMs + '">' + (active ? 'now · ' + countdown(endMs - now) + ' left' : 'in ' + countdown(startMs - now)) + '</span><button type="button" class="mk" data-act="mark" data-k="' + esc(h.n) + '" aria-pressed="' + marked + '">' + (marked ? 'Marked' : 'Mark') + '</button></span></div>';
+  }).join('');
+}
+function tickWheel(){
+  const now = Date.now();
+  let needFull = false;
+  document.querySelectorAll('#hols .cd').forEach(el => {
+    const st = +el.dataset.start, en = +el.dataset.end;
+    if (now >= en || (now >= st && !el.textContent.startsWith('now'))) needFull = true;
+    else el.textContent = now >= st ? 'now · ' + countdown(en - now) + ' left' : 'in ' + countdown(st - now);
+  });
+  const g = gdate(gameMin(now)), hh = Math.floor(g.mod / 60), mm = Math.floor(g.mod % 60);
+  const sm = $('#today small');
+  if (needFull || !sm || !sm.textContent.startsWith(String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0'))) renderWheel();
+}
+
+// ── the hawthorn test ───────────────────────────────────────────
+const RIGHT = ['Correct.', 'Right.', 'That’s it.', 'Nice.', 'Correct. Pass it on.'];
+const WRONG = ['Not quite. Here’s the answer:', 'Wrong one. Here’s why:'];
+const TITLES = [[15,'Bay expert'],[10,'Veteran'],[5,'Journeyman'],[3,'Getting it'],[1,'Started']];
+const two = (n) => { const a = Math.floor(Math.random() * n); let b = Math.floor(Math.random() * (n - 1)); if (b >= a) b++; return [a, b]; };
+const GEN = [
+  () => { const i = Math.floor(Math.random() * 5); return {q:'You walk in and see: “' + SHOPS[i].line + '…” How good is this shop?', opts: SHOPS.map((s, k) => ({t:'Tier ' + s.glyph + ': ' + s.metal, ok:k === i})), why: 'Tier ' + SHOPS[i].glyph + ', ' + SHOPS[i].metal + ' (' + SHOPS[i].q + '). ' + SHOPS[i].verdict}; },
+  () => { const [a, b] = two(5); return {q:'You have a sack of loot to sell. Which room pays you more?', opts:[a, b].map(k => ({t:'“' + SHOPS[k].line + '…”', ok:k === Math.min(a, b)})), why:'The better the shop, the more it pays. Sell in incense shops.'}; },
+  () => { const pool = DUN.filter(r => r[2] >= 0); let a, b; do { [a, b] = two(pool.length); } while (pool[a][2] === pool[b][2]); return {q:'You want rare metal. Which dungeon do you go down?', opts:[pool[a], pool[b]].map(r => ({t:r[1], ok:r[2] === Math.max(pool[a][2], pool[b][2])})), why:'Metal follows the kind of place. Covens and Volcanic Caves sit at the top; mines and nests at the bottom.'}; },
+  () => { let a, b; do { [a, b] = two(DUN.length); } while (DUN[a][3] === DUN[b][3]); return {q:'You want magic off the treasure piles. Which kind of dungeon?', opts:[DUN[a], DUN[b]].map(r => ({t:r[1], ok:r[3] === Math.max(DUN[a][3], DUN[b][3])})), why:'Magic follows how deadly the kind runs. Dragon’s Dens and Volcanic Caves lead.'}; },
+  () => { const all = []; WANTS.forEach(w => w.foes.forEach(f => all.push([f, w.label]))); const [f, lab] = pick(all); return {q:(/^[AEIOU]/.test(f) ? 'An ' : 'A ') + f + ' stands in your way. What metal does it want?', opts: WANTS.map(w => ({t:w.label + ' or better', ok:w.label === lab})), why:f + ' needs ' + lab.toLowerCase() + ' or better. Online a weaker weapon still hits, but does 20% less per tier short.'}; },
+  () => { let a, b; do { [a, b] = two(SOULS.length); } while (SOULS[a][2] === SOULS[b][2]); return {q:'Which trapped soul gives back more enchantment room?', opts:[SOULS[a], SOULS[b]].map(s => ({t:s[1], ok:s[2] === Math.max(SOULS[a][2], SOULS[b][2])})), why:SOULS[a][1] + ' gives back ' + fmt(SOULS[a][2]) + '; ' + SOULS[b][1] + ' gives back ' + fmt(SOULS[b][2]) + '.'}; },
+  () => { const F = [['make magic items in the Mages Guild', 5],['buy magic items in the Mages Guild', 3],['summon Daedra in the Mages Guild', 6],['teleport with the Mages Guild', 8],['claim mithril plate from a knightly order', 5],['make spells at the Temple of Kynareth', 6],['sell magic items to the Thieves Guild', 2],['make potions with the Dark Brotherhood', 3]];
+    const [what, r] = pick(F); const opts = shuffle([r, ...shuffle([1,2,3,4,5,6,7,8,9].filter(x => x !== r)).slice(0, 3)]); return {q:'At what rank can you ' + what + '?', opts: opts.map(o => ({t:'Rank ' + o, ok:o === r})), why:'Rank ' + r + '. Each rank needs reputation of ten times the rank, plus two guild skills.'}; },
+  () => { const fam = pick(FAM_KEYS), name = pick(FAMS[fam]); const right = pick(DUN.filter(r => r[5] === fam)); const wrong = shuffle(DUN.filter(r => r[5] && r[5] !== fam)).filter((r, i, a) => a.findIndex(x => x[5] === r[5]) === i).slice(0, 3);
+    return {q:'You want ' + name + '. Which place leans toward it?', opts:[right, ...wrong].map(r => ({t:r[1], ok:r === right})), why:name + ' is a ' + fam + ' Legendary. ' + fam + ' places and foes are five times likelier to drop it.'}; },
+  () => { let a, b; do { [a, b] = two(10); } while (MET_ROOM[a] === MET_ROOM[b]); return {q:'Which metal holds more enchantment?', opts:[a, b].map(i => ({t:MET[i], ok:MET_ROOM[i] === Math.max(MET_ROOM[a], MET_ROOM[b])})), why:MET[a] + ' ×' + MET_ROOM[a] + ', ' + MET[b] + ' ×' + MET_ROOM[b] + '. Silver and adamantium hold more than mithril.'}; }
+];
+function newTrial(){
+  current = pick(GEN)(); current.opts = shuffle(current.opts); current.done = false;
+  $('#tq').innerHTML = current.q;
+  $('#tans').innerHTML = current.opts.map((o, i) => '<button type="button" class="ans" data-act="ans" data-i="' + i + '">' + o.t + '</button>').join('');
+  $('#tfb').innerHTML = '';
+}
+function renderStreak(){
+  $('#streak').textContent = streak; $('#best').textContent = S.best;
+  const t = TITLES.find(([n]) => streak >= n);
+  $('#title').textContent = t ? t[1] : '';
+}
+function answer(i){
+  if (!current || current.done) return;
+  current.done = true;
+  const o = current.opts[i];
+  document.querySelectorAll('#tans .ans').forEach((b, k) => { b.disabled = true; if (current.opts[k].ok) b.classList.add('right'); else if (k === i) b.classList.add('wrong'); });
+  if (o.ok) {
+    streak++; if (streak > S.best) S.best = streak;
+    let msg = pick(RIGHT);
+    if (streak === 3) msg = 'Three in a row.';
+    if (streak === 5) { msg = 'Five in a row. Quiz explored.'; plant('test'); }
+    if (streak === 10) msg = 'Ten in a row.';
+    if (streak === 15) msg = 'Fifteen in a row. You know the Bay.';
+    $('#tfb').innerHTML = '<p class="fx ok">' + msg + '</p><p class="why">' + current.why + '</p>';
+  } else {
+    streak = 0;
+    $('#tfb').innerHTML = '<p class="fx no">' + pick(WRONG) + '</p><p class="why">' + current.why + '</p>';
+  }
+  save(); renderStreak();
+}
+
+// ── wiring ──────────────────────────────────────────────────────
+function renderAll(){
+  renderSigil(); renderGrove(); renderCounter(); renderDescent(); renderForge(); renderHarvest(); renderDoors(); renderBinding(); renderKindling(); renderWheel(); renderStreak();
+}
+function onLuckish(){ renderSigil(); renderCounter(); renderDescent(); renderHarvest(); renderKindling(); save(); }
+
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('[data-act]'); if (!t || t.disabled) return;
+  const a = t.dataset.act;
+  if (a === 'luck') { S.luck = Math.max(1, Math.min(100, S.luck + Number(t.dataset.d))); onLuckish(); }
+  else if (a === 'veil') { S.veil = !S.veil; save(); renderAll(); toast(S.veil ? 'The veil falls. Read the signs.' : 'The bark peels back. Here are the numbers.'); }
+  else if (a === 'shop') { S.shop = +t.dataset.i; save(); plant('counter'); renderCounter(); }
+  else if (a === 'seek') { S.seek = t.dataset.k; save(); plant('descent'); renderDescent(); }
+  else if (a === 'fam') { S.fam = t.dataset.k; save(); plant('descent'); renderDescent(); }
+  else if (a === 'dun') { const d = +t.dataset.d; S.dun = S.dun === d ? -1 : d; save(); plant('descent'); renderDescent(); }
+  else if (a === 'metal') { S.metal = +t.dataset.i; save(); plant('forge'); renderForge(); }
+  else if (a === 'src') { S.src = t.dataset.k; save(); plant('harvest'); renderHarvest(); }
+  else if (a === 'cast') cast(+t.dataset.n);
+  else if (a === 'resetbones') { S.drought = 0; S.recent = []; S.tally = {common:0, magic:0, rare:0, legendary:0}; $('#lastroll').textContent = ''; save(); renderHarvest(); }
+  else if (a === 'rank') { S.rank = Math.max(1, Math.min(9, S.rank + Number(t.dataset.d))); save(); plant('doors'); renderDoors(); }
+  else if (a === 'rankset') { S.rank = +t.dataset.n; save(); plant('doors'); renderDoors(); }
+  else if (a === 'bind') { const k = t.dataset.k, i = S.bind.indexOf(k); if (i >= 0) S.bind.splice(i, 1); else if (S.bind.length < 10) S.bind.push(k); save(); plant('binding'); renderBinding(); }
+  else if (a === 'party') { S.party = +t.dataset.n; save(); plant('kindling'); renderKindling(); }
+  else if (a === 'mark') { const k = t.dataset.k; if (S.marks[k]) delete S.marks[k]; else S.marks[k] = 1; save(); plant('wheel'); renderWheel(); if (S.marks[k]) toast('Marked.'); }
+  else if (a === 'ans') answer(+t.dataset.i);
+  else if (a === 'next') newTrial();
+});
+['luck','level','renown'].forEach(k => {
+  $('#sig-' + k).addEventListener('input', (e) => { S[k] = +e.target.value; if (k === 'level') { renderSigil(); renderDescent(); renderKindling(); renderCarry(); save(); } else onLuckish(); });
+});
+document.addEventListener('input', (e) => { if (e.target.id === 'worth') { renderPrice(); plant('counter'); } });
+$('#ench-item').addEventListener('change', (e) => { S.item = e.target.value; save(); plant('binding'); renderBinding(); });
+$('#ench-metal').addEventListener('change', (e) => { S.emetal = +e.target.value; save(); plant('binding'); renderBinding(); });
+
+function start(data){
+  adopt(load());
+  if (data && typeof data === 'object' && data.S) { adopt(data.S); streak = data.streak | 0; }
+  $('#stavenav').innerHTML = LADDERS.map(l => '<a href="#' + l.id + '" data-id="' + l.id + '" title="' + esc(l.name) + '"><canvas data-icon="' + l.icon + '" width="9" height="9" aria-hidden="true"></canvas><span>' + esc(l.name) + '</span></a>').join('');
+  paintIcons($('#stavenav'));
+  initBinding(); renderRarities(); renderOmen();
+  renderAll(); newTrial();
+  setInterval(tickWheel, 1000);
+}
+if (window.claude && window.claude.hot && window.claude.hot.snapshot) { try { window.claude.hot.snapshot(() => ({S, streak})); } catch (e) {} }
+if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(start); else start((window.claude && window.claude.hot && window.claude.hot.data) || {});
+})();
+</script>
+
+</body></html>
